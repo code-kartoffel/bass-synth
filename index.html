@@ -3,39 +3,40 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Modular Kick Synth</title>
+<title>Modular Sequenced Bass Synth</title>
 <style>
   :root {
-    --bg: #101116;
-    --rack: #242833;
-    --rail: #0b0c10;
-    --screw: #6f7480;
-    --panel: #d7d2c5;
-    --panel-dark: #2e333d;
-    --ink: #16181f;
-    --muted: #5f6470;
-    --yellow: #decc02;
-    --orange: #db7a23;
-    --blue: #3383c8;
-    --red: #c54242;
-    --green: #3f9d62;
-    --cable: #decc02;
+    --bg: #101014;
+    --rack: #252630;
+    --rail: #090a0d;
+    --panel: #d5cfc2;
+    --panel-dark: #2c3039;
+    --ink: #17181e;
+    --muted: #626873;
+    --accent: #d63a32;
+    --accent-bright: #ff5047;
+    --accent-soft: rgba(214,58,50,0.22);
+    --cable-red: rgba(214,58,50,0.98);
+    --cable-blue: rgba(55,128,202,0.98);
+    --cable-green: rgba(63,157,98,0.98);
+    --cable-yellow: rgba(222,186,41,0.98);
+    --screw: #747884;
   }
 
   * { box-sizing: border-box; }
 
   body {
     margin: 0;
-    background:
-      radial-gradient(circle at top left, rgba(222,204,2,0.08), transparent 30%),
-      linear-gradient(180deg, #171922, var(--bg));
-    color: #f0f2f5;
-    font: 13px/1.35 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     min-height: 100vh;
+    background:
+      radial-gradient(circle at top left, rgba(214,58,50,0.13), transparent 30%),
+      linear-gradient(180deg, #171821, var(--bg));
+    color: #f1f3f5;
+    font: 13px/1.35 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   }
 
   header {
-    max-width: 1500px;
+    max-width: 1680px;
     margin: 0 auto;
     padding: 20px 18px 8px;
   }
@@ -47,12 +48,12 @@
   }
 
   .subtitle {
-    color: #aeb4c0;
+    color: #b3bac5;
     margin-top: 4px;
   }
 
   main {
-    max-width: 1500px;
+    max-width: 1680px;
     margin: 0 auto;
     padding: 12px 18px 28px;
   }
@@ -68,33 +69,39 @@
   button, select {
     border: 1px solid rgba(255,255,255,0.18);
     border-radius: 9px;
-    background: #12141b;
-    color: #f1f5f9;
+    background: #13141a;
+    color: #f8fafc;
     padding: 9px 12px;
     font: inherit;
   }
 
   button {
     cursor: pointer;
-    font-weight: 700;
+    font-weight: 800;
   }
 
   button:hover {
-    border-color: rgba(222,204,2,0.75);
-    background: #171a22;
+    border-color: rgba(214,58,50,0.88);
+    background: #1b1d25;
+  }
+
+  button.active {
+    background: var(--accent);
+    border-color: rgba(255,255,255,0.25);
+    color: #fff;
   }
 
   .hint {
-    color: #aeb4c0;
+    color: #b3bac5;
   }
 
   .rack {
     position: relative;
     display: grid;
-    grid-template-columns: 105px 128px 143px 143px 128px 143px 128px minmax(520px, 1fr);
+    grid-template-columns: 116px 300px 128px 128px 128px 128px 128px minmax(540px, 1fr);
     gap: 6px;
     align-items: stretch;
-    min-height: 620px;
+    min-height: 690px;
     background:
       linear-gradient(180deg, var(--rail) 0 18px, transparent 18px calc(100% - 18px), var(--rail) calc(100% - 18px)),
       repeating-linear-gradient(90deg, rgba(255,255,255,0.035) 0 1px, transparent 1px 18px),
@@ -108,14 +115,15 @@
 
   .module {
     position: relative;
+    z-index: 5;
+    min-height: 630px;
+    padding: 12px 8px 14px;
     background:
       linear-gradient(90deg, rgba(255,255,255,0.18), transparent 7%, transparent 93%, rgba(0,0,0,0.18)),
       var(--panel);
     color: var(--ink);
     border: 1px solid rgba(0,0,0,0.48);
     border-radius: 4px;
-    min-height: 560px;
-    padding: 12px 10px 14px;
     box-shadow:
       inset 0 0 0 1px rgba(255,255,255,0.35),
       0 8px 18px rgba(0,0,0,0.28);
@@ -161,7 +169,7 @@
     text-align: center;
     color: var(--muted);
     font-size: 10px;
-    letter-spacing: 0.16em;
+    letter-spacing: 0.12em;
     margin-top: -7px;
     margin-bottom: 12px;
   }
@@ -173,20 +181,23 @@
     grid-template-columns: 1fr;
     justify-items: center;
     gap: 5px;
-    margin: 13px 0;
+    margin: 12px 0;
   }
 
   .control label {
-    font-size: 11px;
-    font-weight: 800;
+    font-size: 10px;
+    font-weight: 900;
     letter-spacing: 0.06em;
     text-transform: uppercase;
+    text-align: center;
   }
 
   .read {
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     font-size: 11px;
     color: var(--muted);
+    min-height: 15px;
+    text-align: center;
   }
 
   .dark .read { color: #c7ccd4; }
@@ -212,14 +223,14 @@
     content: "";
     position: absolute;
     left: 50%;
-    top: 7px;
+    top: 6px;
     width: 4px;
-    height: 18px;
+    height: 16px;
     border-radius: 3px;
-    background: var(--yellow);
-    transform-origin: 50% 20px;
+    background: var(--accent-bright);
+    transform-origin: 50% 18px;
     transform: translateX(-50%) rotate(var(--angle));
-    box-shadow: 0 0 5px rgba(222,204,2,0.65);
+    box-shadow: 0 0 5px rgba(255,80,71,0.75);
   }
 
   .small-knob {
@@ -227,26 +238,44 @@
     height: 38px;
   }
 
+  .select-control {
+    width: 96%;
+    padding: 7px;
+    background: #171a20;
+    color: #eef2f6;
+    border-color: rgba(0,0,0,0.45);
+  }
+
+  .divider {
+    height: 2px;
+    background: rgba(0,0,0,0.22);
+    margin: 13px 0;
+  }
+
+  .dark .divider { background: rgba(255,255,255,0.16); }
+
   .jack-row {
     display: flex;
     justify-content: center;
     gap: 8px;
     flex-wrap: wrap;
-    margin: 12px 0;
+    margin: 11px 0;
   }
 
   .jack-wrap {
     display: grid;
     justify-items: center;
     gap: 5px;
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: 0.05em;
+    font-size: 9px;
+    font-weight: 900;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
+    text-align: center;
   }
 
   .jack {
     position: relative;
+    z-index: 25;
     width: 26px;
     height: 26px;
     border-radius: 50%;
@@ -258,35 +287,75 @@
       0 2px 5px rgba(0,0,0,0.35);
   }
 
-  .jack.in { outline: 2px solid rgba(51,131,200,0.55); }
-  .jack.out { outline: 2px solid rgba(222,204,2,0.55); }
+  .jack.in { outline: 2px solid rgba(55,128,202,0.55); }
+  .jack.out { outline: 2px solid rgba(214,58,50,0.70); }
 
-  .divider {
-    height: 2px;
-    background: rgba(0,0,0,0.22);
-    margin: 14px 0;
-  }
-
-  .dark .divider { background: rgba(255,255,255,0.16); }
-
-  .cv-meter {
-    height: 120px;
-    width: 22px;
-    border-radius: 12px;
-    border: 1px solid rgba(0,0,0,0.55);
-    background: #171a20;
-    overflow: hidden;
-    position: relative;
-    box-shadow: inset 0 0 9px rgba(0,0,0,0.8);
-  }
-
-  .cv-meter span {
+  .module-footer {
     position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 45%;
-    background: linear-gradient(180deg, #fff06a, var(--yellow));
+    left: 8px;
+    right: 8px;
+    bottom: 24px;
+    text-align: center;
+    opacity: 0.65;
+    font-size: 9px;
+    letter-spacing: 0.10em;
+    font-weight: 900;
+  }
+
+  .seq-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+    margin-top: 10px;
+  }
+
+  .step {
+    border: 1px solid rgba(0,0,0,0.45);
+    background: rgba(0,0,0,0.08);
+    border-radius: 8px;
+    padding: 7px 3px;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 14px 1fr 21px;
+    gap: 3px;
+    justify-items: center;
+    align-items: center;
+    min-height: 104px;
+  }
+
+  .step.current {
+    box-shadow: 0 0 0 2px var(--accent), 0 0 14px rgba(214,58,50,0.55);
+  }
+
+  .step.off {
+    opacity: 0.45;
+  }
+
+  .step button {
+    width: 42px;
+    padding: 3px 0;
+    border-radius: 5px;
+    font-size: 9px;
+    color: #fff;
+    background: #1a1c23;
+  }
+
+  .step button.on {
+    background: var(--accent);
+  }
+
+  .step select {
+    width: 100%;
+    padding: 3px 2px;
+    border-radius: 5px;
+    font-size: 10px;
+    background: #15171d;
+  }
+
+  .step .num {
+    font: 10px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    color: var(--muted);
+    line-height: 1;
   }
 
   .scope {
@@ -297,19 +366,27 @@
     min-width: 0;
   }
 
+  .scope-title {
+    color: var(--accent-bright);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 12px;
+    margin-bottom: 7px;
+  }
+
   canvas {
     width: 100%;
     display: block;
     background:
-      linear-gradient(rgba(222,204,2,0.08) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(222,204,2,0.08) 1px, transparent 1px),
+      linear-gradient(rgba(214,58,50,0.09) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(214,58,50,0.09) 1px, transparent 1px),
       #050608;
     background-size: 28px 28px;
     border-radius: 4px;
   }
 
-  #scopeCanvas { height: 240px; }
-  #envCanvas { height: 190px; }
+  #waveCanvas { height: 250px; }
+  #seqCanvas { height: 185px; }
+
   #patchCanvas {
     position: absolute;
     inset: 0;
@@ -323,17 +400,9 @@
     border-radius: 0;
   }
 
-  .module {
-    z-index: 5;
-  }
-
-  .jack {
-    z-index: 25;
-  }
-
   .metrics {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0,1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 8px;
     margin-top: 10px;
   }
@@ -358,174 +427,238 @@
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   }
 
-  .select-control {
-    width: 120px;
-    padding: 7px;
-    background: #171a20;
-    color: #eef2f6;
-    border-color: rgba(0,0,0,0.45);
+  .lamp {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #5f666f, #181a20 68%);
+    border: 1px solid rgba(0,0,0,0.55);
+    box-shadow: inset 0 0 7px rgba(0,0,0,0.7);
   }
 
-  .module-footer {
-    position: absolute;
-    left: 10px;
-    right: 10px;
-    bottom: 24px;
-    text-align: center;
-    color: inherit;
-    opacity: 0.65;
-    font-size: 10px;
-    letter-spacing: 0.12em;
-    font-weight: 800;
+  .lamp.on {
+    background: radial-gradient(circle at 35% 35%, #ffd1cc, var(--accent-bright) 40%, #6f1512 75%);
+    box-shadow: 0 0 18px rgba(214,58,50,0.85), inset 0 0 7px rgba(255,255,255,0.18);
   }
 
-  .scope-title {
-    color: #decc02;
-    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    font-size: 12px;
-    margin-bottom: 7px;
-  }
-
-  @media (max-width: 1200px) {
+  @media (max-width: 1300px) {
     .rack {
-      grid-template-columns: repeat(3, minmax(160px, 1fr));
+      grid-template-columns: repeat(4, minmax(110px, 1fr));
       overflow: auto;
     }
 
-    .module {
-      min-height: 540px;
+    .sequencer-module {
+      grid-column: span 2;
     }
 
     .scope-module {
       grid-column: 1 / -1;
     }
   }
+
+  .step-note {
+    display: grid;
+    justify-items: center;
+    align-content: center;
+    gap: 2px;
+  }
+
+  .note-knob {
+    --angle: -135deg;
+    position: relative;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle at 35% 30%, #5a606b 0 9%, transparent 10%),
+      radial-gradient(circle, #272b33 0 54%, #0c0d12 55% 74%, #3c424d 75%);
+    border: 2px solid rgba(0,0,0,0.65);
+    box-shadow:
+      inset -3px -4px 6px rgba(0,0,0,0.55),
+      inset 2px 2px 5px rgba(255,255,255,0.18),
+      0 2px 6px rgba(0,0,0,0.32);
+    cursor: ns-resize;
+  }
+
+  .note-knob::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 5px;
+    width: 3px;
+    height: 10px;
+    border-radius: 3px;
+    background: var(--accent-bright);
+    transform-origin: 50% 11px;
+    transform: translateX(-50%) rotate(var(--angle));
+    box-shadow: 0 0 5px rgba(255,80,71,0.75);
+  }
+
+  .note-read {
+    min-width: 34px;
+    font: 9px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    color: var(--muted);
+    text-align: center;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
 </style>
 </head>
 <body>
 <header>
-  <h1>Modular Kick Synth</h1>
-  <div class="subtitle">A compact rack-style kick patch: gate source, pitch envelope, oscillator, drive, VCA, amplitude envelope, output, and scope.</div>
+  <h1>Modular Sequenced Bass Synth</h1>
+  <div class="subtitle">Clocked 16th-note sequencer, F minor quantized pitch CV, VCO, filter, drive, envelope, VCA, output, and waveform monitor.</div>
 </header>
 
 <main>
   <div class="toolbar">
-    <button id="playBtn">Play Kick</button>
-    <button id="randomBtn">Randomize Patch</button>
-    <span class="hint">Shortcut: Spacebar plays the current patch.</span>
+    <button id="startBtn">Start</button>
+    <button id="stopBtn">Stop</button>
+    <button id="randomBtn">Randomize Sequence</button>
+    <button id="oneBtn">One Bar</button>
+    <span class="hint">Default: 145 BPM, 16th notes, F minor. Space starts/stops.</span>
   </div>
 
   <section class="rack" id="rack">
     <canvas id="patchCanvas"></canvas>
 
-
-    <div class="module" data-module="gate">
+    <div class="module" data-module="clock">
       <i class="screw tl"></i><i class="screw tr"></i><i class="screw bl"></i><i class="screw br"></i>
-      <div class="module-title">GATE</div>
-      <div class="brand">TRIGGER SOURCE</div>
+      <div class="module-title">CLOCK</div>
+      <div class="brand">16TH PULSE</div>
 
       <div class="control">
-        <button id="gateTrigBtn">TRIG</button>
-        <div class="read">manual pulse</div>
+        <label>BPM</label>
+        <div class="knob" data-param="bpm"></div>
+        <div class="read" id="bpmRead"></div>
+      </div>
+
+      <div class="control">
+        <label>Run</label>
+        <div class="lamp" id="clockLamp"></div>
+        <div class="read" id="clockRead">stopped</div>
       </div>
 
       <div class="divider"></div>
-
       <div class="jack-row">
-        <div class="jack-wrap">GATE OUT<div class="jack out" id="jack-gate-out-a"></div></div>
+        <div class="jack-wrap">CLK OUT<div class="jack out" id="jack-clock-out"></div></div>
       </div>
 
-      <div class="jack-row">
-        <div class="jack-wrap">MULT<div class="jack out" id="jack-gate-out-b"></div></div>
-      </div>
-
-      <div class="module-footer">ONE SHOT</div>
+      <div class="module-footer">MASTER</div>
     </div>
 
-    <div class="module" data-module="pitchEnv">
+    <div class="module sequencer-module" data-module="seq">
       <i class="screw tl"></i><i class="screw tr"></i><i class="screw bl"></i><i class="screw br"></i>
-      <div class="module-title">PITCH ENV</div>
-      <div class="brand">CV GENERATOR</div>
+      <div class="module-title">16 STEP SEQ</div>
+      <div class="brand">SCALE CV</div>
 
-      <div class="control">
-        <label>Amount</label>
-        <div class="knob" data-param="pitchAmt"></div>
-        <div class="read" id="pitchAmtRead"></div>
-      </div>
-      <div class="control">
-        <label>Attack</label>
-        <div class="knob small-knob" data-param="pA"></div>
-        <div class="read" id="pARead"></div>
-      </div>
-      <div class="control">
-        <label>Decay</label>
-        <div class="knob" data-param="pD"></div>
-        <div class="read" id="pDRead"></div>
-      </div>
-      <div class="control">
-        <label>Sustain</label>
-        <div class="knob small-knob" data-param="pS"></div>
-        <div class="read" id="pSRead"></div>
-      </div>
-      <div class="control">
-        <label>Release</label>
-        <div class="knob small-knob" data-param="pR"></div>
-        <div class="read" id="pRRead"></div>
+      <div class="control" style="grid-template-columns: 1fr 1fr; gap:8px; align-items:end;">
+        <div>
+          <label>Root</label>
+          <select class="select-control" id="rootSelect">
+            <option>C</option><option>C#</option><option>D</option><option>D#</option><option>E</option>
+            <option selected>F</option><option>F#</option><option>G</option><option>G#</option><option>A</option><option>A#</option><option>B</option>
+          </select>
+        </div>
+        <div>
+          <label>Scale</label>
+          <select class="select-control" id="scaleSelect">
+            <option value="minor" selected>minor</option>
+            <option value="phrygian">phrygian</option>
+            <option value="dorian">dorian</option>
+            <option value="major">major</option>
+            <option value="chromatic">chromatic</option>
+          </select>
+        </div>
       </div>
 
+      <div class="seq-grid" id="seqGrid"></div>
+
+      <div style="height:8px"></div>
       <div class="divider"></div>
       <div class="jack-row">
-        <div class="jack-wrap">GATE<div class="jack in" id="jack-gate-pitch"></div></div>
-        <div class="jack-wrap">CV OUT<div class="jack out" id="jack-pitch-out"></div></div>
+        <div class="jack-wrap">CLK IN<div class="jack in" id="jack-seq-clock"></div></div>
+        <div class="jack-wrap">GATE<div class="jack out" id="jack-seq-gate"></div></div>
+        <div class="jack-wrap">V/OCT<div class="jack out" id="jack-seq-cv"></div></div>
       </div>
-      <div class="module-footer">EXP ADSR</div>
+
+      <div class="module-footer">QUANTIZED</div>
     </div>
 
     <div class="module" data-module="vco">
       <i class="screw tl"></i><i class="screw tr"></i><i class="screw bl"></i><i class="screw br"></i>
-      <div class="module-title">VCO</div>
-      <div class="brand">AUDIO SOURCE</div>
+      <div class="module-title">BASS VCO</div>
+      <div class="brand">OSCILLATOR</div>
 
       <div class="control">
         <label>Wave</label>
         <select class="select-control" id="waveform">
-          <option value="sine">SINE</option>
-          <option value="triangle">TRIANGLE</option>
+          <option value="sawtooth" selected>SAW</option>
           <option value="square">SQUARE</option>
-          <option value="sawtooth">SAW</option>
+          <option value="triangle">TRIANGLE</option>
+          <option value="sine">SINE</option>
         </select>
         <div class="read">audio</div>
       </div>
 
       <div class="control">
-        <label>Base Freq</label>
-        <div class="knob" data-param="baseFreq"></div>
-        <div class="read" id="baseFreqRead"></div>
+        <label>Octave</label>
+        <div class="knob" data-param="octave"></div>
+        <div class="read" id="octaveRead"></div>
       </div>
 
       <div class="divider"></div>
       <div class="jack-row">
-        <div class="jack-wrap">1V/OCT<div class="jack in" id="jack-vco-cv"></div></div>
+        <div class="jack-wrap">V/OCT<div class="jack in" id="jack-vco-cv"></div></div>
         <div class="jack-wrap">OUT<div class="jack out" id="jack-vco-out"></div></div>
       </div>
-      <div class="module-footer">OSCILLATOR</div>
+      <div class="module-footer">ACID BASS</div>
+    </div>
+
+    <div class="module" data-module="filter">
+      <i class="screw tl"></i><i class="screw tr"></i><i class="screw bl"></i><i class="screw br"></i>
+      <div class="module-title">VCF</div>
+      <div class="brand">LOW PASS</div>
+
+      <div class="control">
+        <label>Cutoff</label>
+        <div class="knob" data-param="cutoff"></div>
+        <div class="read" id="cutoffRead"></div>
+      </div>
+      <div class="control">
+        <label>Res</label>
+        <div class="knob small-knob" data-param="resonance"></div>
+        <div class="read" id="resonanceRead"></div>
+      </div>
+      <div class="control">
+        <label>Env Amt</label>
+        <div class="knob small-knob" data-param="filterEnv"></div>
+        <div class="read" id="filterEnvRead"></div>
+      </div>
+
+      <div class="divider"></div>
+      <div class="jack-row">
+        <div class="jack-wrap">IN<div class="jack in" id="jack-filter-in"></div></div>
+        <div class="jack-wrap">OUT<div class="jack out" id="jack-filter-out"></div></div>
+      </div>
+      <div class="module-footer">24DB STYLE</div>
     </div>
 
     <div class="module" data-module="drive">
       <i class="screw tl"></i><i class="screw tr"></i><i class="screw bl"></i><i class="screw br"></i>
       <div class="module-title">DRIVE</div>
-      <div class="brand">SOFT SATURATOR</div>
+      <div class="brand">SATURATOR</div>
 
       <div class="control">
         <label>Drive</label>
         <div class="knob" data-param="drive"></div>
         <div class="read" id="driveRead"></div>
       </div>
-
       <div class="control">
-        <label>Click</label>
-        <div class="knob" data-param="clickLevel"></div>
-        <div class="read" id="clickLevelRead"></div>
+        <label>Tone</label>
+        <div class="knob small-knob" data-param="tone"></div>
+        <div class="read" id="toneRead"></div>
       </div>
 
       <div class="divider"></div>
@@ -533,73 +666,53 @@
         <div class="jack-wrap">IN<div class="jack in" id="jack-drive-in"></div></div>
         <div class="jack-wrap">OUT<div class="jack out" id="jack-drive-out"></div></div>
       </div>
-      <div class="module-footer">TANH SHAPER</div>
+      <div class="module-footer">CLIPPER</div>
     </div>
 
-    <div class="module" data-module="ampEnv">
+    <div class="module" data-module="env">
       <i class="screw tl"></i><i class="screw tr"></i><i class="screw bl"></i><i class="screw br"></i>
-      <div class="module-title">AMP ENV</div>
-      <div class="brand">VCA CV</div>
+      <div class="module-title">ENV</div>
+      <div class="brand">VCA + VCF CV</div>
 
       <div class="control">
         <label>Attack</label>
-        <div class="knob small-knob" data-param="aA"></div>
-        <div class="read" id="aARead"></div>
+        <div class="knob small-knob" data-param="attack"></div>
+        <div class="read" id="attackRead"></div>
       </div>
       <div class="control">
         <label>Decay</label>
-        <div class="knob" data-param="aD"></div>
-        <div class="read" id="aDRead"></div>
+        <div class="knob" data-param="decay"></div>
+        <div class="read" id="decayRead"></div>
       </div>
       <div class="control">
         <label>Sustain</label>
-        <div class="knob small-knob" data-param="aS"></div>
-        <div class="read" id="aSRead"></div>
+        <div class="knob small-knob" data-param="sustain"></div>
+        <div class="read" id="sustainRead"></div>
       </div>
       <div class="control">
         <label>Release</label>
-        <div class="knob small-knob" data-param="aR"></div>
-        <div class="read" id="aRRead"></div>
+        <div class="knob small-knob" data-param="release"></div>
+        <div class="read" id="releaseRead"></div>
       </div>
 
       <div class="divider"></div>
       <div class="jack-row">
-        <div class="jack-wrap">GATE<div class="jack in" id="jack-gate-amp"></div></div>
-        <div class="jack-wrap">CV OUT<div class="jack out" id="jack-ampenv-out"></div></div>
+        <div class="jack-wrap">GATE<div class="jack in" id="jack-env-gate"></div></div>
+        <div class="jack-wrap">CV OUT<div class="jack out" id="jack-env-out"></div></div>
       </div>
-      <div class="module-footer">EXP ADSR</div>
+      <div class="module-footer">SNAPPY</div>
     </div>
 
     <div class="module" data-module="vca">
       <i class="screw tl"></i><i class="screw tr"></i><i class="screw bl"></i><i class="screw br"></i>
-      <div class="module-title">VCA</div>
-      <div class="brand">AMPLIFIER</div>
-
-      <div class="control">
-        <label>Gate</label>
-        <div class="knob" data-param="duration"></div>
-        <div class="read" id="durationRead"></div>
-      </div>
-
-      <div class="control">
-        <label>CV Level</label>
-        <div class="cv-meter"><span id="cvMeter"></span></div>
-        <div class="read">0-5 V</div>
-      </div>
-
-      <div class="divider"></div>
-      <div class="jack-row">
-        <div class="jack-wrap">IN<div class="jack in" id="jack-vca-in"></div></div>
-        <div class="jack-wrap">CV<div class="jack in" id="jack-vca-cv"></div></div>
-        <div class="jack-wrap">OUT<div class="jack out" id="jack-vca-out"></div></div>
-      </div>
-      <div class="module-footer">LINEAR VCA</div>
-    </div>
-
-    <div class="module" data-module="out">
-      <i class="screw tl"></i><i class="screw tr"></i><i class="screw bl"></i><i class="screw br"></i>
-      <div class="module-title">OUTPUT</div>
+      <div class="module-title">VCA/OUT</div>
       <div class="brand">MASTER</div>
+
+      <div class="control">
+        <label>Gate Len</label>
+        <div class="knob" data-param="gateLen"></div>
+        <div class="read" id="gateLenRead"></div>
+      </div>
 
       <div class="control">
         <label>Gain</label>
@@ -609,44 +722,40 @@
 
       <div class="divider"></div>
       <div class="jack-row">
-        <div class="jack-wrap">IN L<div class="jack in" id="jack-out-in"></div></div>
+        <div class="jack-wrap">IN<div class="jack in" id="jack-vca-in"></div></div>
+        <div class="jack-wrap">CV<div class="jack in" id="jack-vca-cv"></div></div>
         <div class="jack-wrap">MAIN<div class="jack out" id="jack-main-out"></div></div>
       </div>
-
-      <div class="control">
-        <button id="modulePlayBtn">TRIG</button>
-      </div>
-
       <div class="module-footer">AUDIO OUT</div>
     </div>
 
     <div class="module dark scope-module" data-module="scope">
       <i class="screw tl"></i><i class="screw tr"></i><i class="screw bl"></i><i class="screw br"></i>
       <div class="module-title">SCOPE</div>
-      <div class="brand">SIGNAL MONITOR</div>
-
+      <div class="brand">SEQUENCE MONITOR</div>
 
       <div class="jack-row">
         <div class="jack-wrap">AUDIO IN<div class="jack in" id="jack-scope-in"></div></div>
+        <div class="jack-wrap">CV IN<div class="jack in" id="jack-scope-cv"></div></div>
       </div>
 
       <div class="scope">
-        <div class="scope-title">AUDIO WAVEFORM</div>
-        <canvas id="scopeCanvas" width="760" height="260"></canvas>
+        <div class="scope-title">AUDIO WAVEFORM / ONE BAR</div>
+        <canvas id="waveCanvas" width="820" height="280"></canvas>
       </div>
 
       <div style="height:12px"></div>
 
       <div class="scope">
-        <div class="scope-title">AMP CV + PITCH CV</div>
-        <canvas id="envCanvas" width="760" height="210"></canvas>
+        <div class="scope-title">SEQUENCER CV + GATES</div>
+        <canvas id="seqCanvas" width="820" height="220"></canvas>
       </div>
 
       <div class="metrics">
+        <div class="metric"><b>BPM</b><span id="bpmMetric">145</span></div>
+        <div class="metric"><b>Step</b><span id="stepMetric">-</span></div>
+        <div class="metric"><b>Root</b><span id="rootMetric">F minor</span></div>
         <div class="metric"><b>Peak</b><span id="peakMetric">-</span></div>
-        <div class="metric"><b>RMS</b><span id="rmsMetric">-</span></div>
-        <div class="metric"><b>Body</b><span id="bodyMetric">-</span></div>
-        <div class="metric"><b>Drop</b><span id="dropMetric">-</span></div>
       </div>
     </div>
   </section>
@@ -658,53 +767,112 @@
 
   const $ = (id) => document.getElementById(id);
 
+  const NOTE_NAMES = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
+  const SCALES = {
+    minor: [0,2,3,5,7,8,10],
+    phrygian: [0,1,3,5,7,8,10],
+    dorian: [0,2,3,5,7,9,10],
+    major: [0,2,4,5,7,9,11],
+    chromatic: [0,1,2,3,4,5,6,7,8,9,10,11]
+  };
+
   const params = {
-    pitchAmt: { value: 31, min: 0, max: 96, unit: "st", decimals: 0 },
-    pA: { value: 0, min: 0, max: 40, unit: "ms", decimals: 0 },
-    pD: { value: 31, min: 10, max: 350, unit: "ms", decimals: 0 },
-    pS: { value: 0, min: 0, max: 1, unit: "", decimals: 2 },
-    pR: { value: 30, min: 5, max: 350, unit: "ms", decimals: 0 },
-
-    baseFreq: { value: 34, min: 25, max: 80, unit: "Hz", decimals: 0 },
-    drive: { value: 0.18, min: 0, max: 1, unit: "", decimals: 2 },
-    clickLevel: { value: 0, min: 0, max: 0.45, unit: "", decimals: 2 },
-
-    aA: { value: 1, min: 0, max: 40, unit: "ms", decimals: 0 },
-    aD: { value: 614, min: 20, max: 900, unit: "ms", decimals: 0 },
-    aS: { value: 0, min: 0, max: 1, unit: "", decimals: 2 },
-    aR: { value: 5, min: 5, max: 700, unit: "ms", decimals: 0 },
-
-    duration: { value: 1000, min: 30, max: 1000, unit: "ms", decimals: 0 },
-    gain: { value: 0.55, min: 0, max: 0.9, unit: "", decimals: 2 }
+    bpm: { value: 145, min: 80, max: 190, unit: "BPM", decimals: 0 },
+    octave: { value: -1, min: -2, max: 1, unit: "oct", decimals: 0 },
+    cutoff: { value: 520, min: 80, max: 2800, unit: "Hz", decimals: 0 },
+    resonance: { value: 11, min: 0, max: 24, unit: "Q", decimals: 0 },
+    filterEnv: { value: 0.55, min: 0, max: 1, unit: "", decimals: 2 },
+    drive: { value: 0.36, min: 0, max: 1, unit: "", decimals: 2 },
+    tone: { value: 0.45, min: 0, max: 1, unit: "", decimals: 2 },
+    attack: { value: 2, min: 0, max: 60, unit: "ms", decimals: 0 },
+    decay: { value: 170, min: 30, max: 680, unit: "ms", decimals: 0 },
+    sustain: { value: 0.08, min: 0, max: 0.8, unit: "", decimals: 2 },
+    release: { value: 70, min: 10, max: 420, unit: "ms", decimals: 0 },
+    gateLen: { value: 0.58, min: 0.1, max: 1.0, unit: "", decimals: 2 },
+    gain: { value: 0.42, min: 0, max: 0.9, unit: "", decimals: 2 }
   };
 
   let audioCtx = null;
-  let lastSim = null;
+  let running = false;
+  let currentStep = -1;
+  let timer = null;
+  let oneBarRemaining = 0;
   let animation = 0;
+  let renderLoop = 0;
+  let startTime = 0;
+  let lastStepTime = 0;
+  let lastSim = null;
+
+  const steps = Array.from({ length: 16 }, (_, i) => ({
+    on: [0, 3, 6, 7, 10, 12, 14].includes(i),
+    degree: [0, 0, 2, 3, 4, 3, 0, 5, 4, 3, 0, 2, 0, 1, 3, 2][i] ?? 0,
+    octave: i % 8 === 6 ? 1 : 0
+  }));
 
   function clamp(v, min, max) {
     return Math.max(min, Math.min(max, v));
   }
 
-  function getPatch() {
-    const ms = (key) => params[key].value / 1000;
-    return {
-      waveform: $("waveform").value,
-      baseFreq: params.baseFreq.value,
-      clickLevel: params.clickLevel.value,
-      drive: params.drive.value,
-      pitchAmt: params.pitchAmt.value,
-      pA: ms("pA"),
-      pD: ms("pD"),
-      pS: params.pS.value,
-      pR: ms("pR"),
-      aA: ms("aA"),
-      aD: ms("aD"),
-      aS: params.aS.value,
-      aR: ms("aR"),
-      duration: ms("duration"),
-      gain: params.gain.value
-    };
+  function setupSequencerUI() {
+    const grid = $("seqGrid");
+    grid.innerHTML = "";
+
+    for (let i = 0; i < 16; i++) {
+      const step = document.createElement("div");
+      step.className = "step";
+      step.id = `step-${i}`;
+
+      const num = document.createElement("div");
+      num.className = "num";
+      num.textContent = String(i + 1).padStart(2, "0");
+
+      const toggle = document.createElement("button");
+      toggle.type = "button";
+      toggle.textContent = "ON";
+      toggle.addEventListener("click", () => {
+        steps[i].on = !steps[i].on;
+        updateSeqUI();
+        renderAll();
+      });
+
+      const noteWrap = document.createElement("div");
+      noteWrap.className = "step-note";
+
+      const noteKnob = document.createElement("div");
+      noteKnob.className = "note-knob";
+      noteKnob.dataset.step = String(i);
+
+      const noteRead = document.createElement("div");
+      noteRead.className = "note-read";
+      noteRead.id = `note-read-${i}`;
+
+      noteWrap.appendChild(noteKnob);
+      noteWrap.appendChild(noteRead);
+
+      step.appendChild(num);
+      step.appendChild(toggle);
+      step.appendChild(noteWrap);
+      grid.appendChild(step);
+    }
+
+    updateSeqUI();
+  }
+
+  function updateSeqUI() {
+    for (let i = 0; i < 16; i++) {
+      const el = $(`step-${i}`);
+      if (!el) continue;
+      const btn = el.querySelector("button");
+      const noteKnob = el.querySelector(".note-knob");
+      const noteRead = $(`note-read-${i}`);
+      const u = (steps[i].degree + 7) / 21;
+      el.classList.toggle("current", i === currentStep);
+      el.classList.toggle("off", !steps[i].on);
+      btn.classList.toggle("on", steps[i].on);
+      btn.textContent = steps[i].on ? "ON" : "OFF";
+      if (noteKnob) noteKnob.style.setProperty("--angle", `${-135 + u * 270}deg`);
+      if (noteRead) noteRead.textContent = midiName(stepMidi(steps[i]));
+    }
   }
 
   function valueToAngle(key) {
@@ -725,9 +893,12 @@
       }
     }
 
-    const patch = getPatch();
-    const ampNow = adsrValue(Math.min(0.12, patch.duration), patch.aA, patch.aD, patch.aS, patch.aR, patch.duration);
-    $("cvMeter").style.height = `${Math.round(ampNow * 100)}%`;
+    $("bpmMetric").textContent = String(Math.round(params.bpm.value));
+    $("stepMetric").textContent = currentStep >= 0 ? String(currentStep + 1).padStart(2, "0") : "-";
+    $("rootMetric").textContent = `${$("rootSelect").value} ${$("scaleSelect").value}`;
+    $("clockLamp").classList.toggle("on", running);
+    $("clockRead").textContent = running ? "running" : "stopped";
+    $("startBtn").classList.toggle("active", running);
   }
 
   function setupKnobs() {
@@ -752,6 +923,56 @@
         const step = p.decimals === 0 ? 1 : 0.01;
         p.value = clamp(Math.round((startValue + delta) / step) * step, p.min, p.max);
         updateUI();
+        renderAll();
+        if (running && key === "bpm") restartClock();
+      };
+
+      knob.addEventListener("mousedown", (e) => {
+        e.preventDefault();
+        begin(e.clientY);
+      });
+
+      window.addEventListener("mousemove", (e) => move(e.clientY));
+      window.addEventListener("mouseup", () => {
+        dragging = false;
+        document.body.style.userSelect = "";
+      });
+
+      knob.addEventListener("touchstart", (e) => {
+        e.preventDefault();
+        begin(e.touches[0].clientY);
+      }, { passive: false });
+
+      window.addEventListener("touchmove", (e) => {
+        if (dragging) move(e.touches[0].clientY);
+      }, { passive: false });
+
+      window.addEventListener("touchend", () => {
+        dragging = false;
+        document.body.style.userSelect = "";
+      });
+    });
+  }
+
+  function setupNoteKnobs() {
+    document.querySelectorAll(".note-knob").forEach(knob => {
+      const index = Number(knob.dataset.step);
+      let startY = 0;
+      let startDegree = 0;
+      let dragging = false;
+
+      const begin = (clientY) => {
+        dragging = true;
+        startY = clientY;
+        startDegree = steps[index].degree;
+        document.body.style.userSelect = "none";
+      };
+
+      const move = (clientY) => {
+        if (!dragging) return;
+        const delta = Math.round((startY - clientY) / 12);
+        steps[index].degree = clamp(startDegree + delta, -7, 14);
+        updateSeqUI();
         renderAll();
       };
 
@@ -782,12 +1003,227 @@
     });
   }
 
-  function easeOutExp(u) {
-    u = clamp(u, 0, 1);
-    return 1 - Math.pow(2, -8 * u);
+  function rootMidi() {
+    const root = $("rootSelect").value;
+    const pc = NOTE_NAMES.indexOf(root);
+    return 36 + pc; // C2 plus root pitch class.
   }
 
-  function adsrValue(t, A, D, S, R, gate) {
+  function stepMidi(step) {
+    const scale = SCALES[$("scaleSelect").value] || SCALES.minor;
+    const deg = step.degree;
+    const scaleLen = scale.length;
+    const octaveShift = Math.floor(deg / scaleLen);
+    const idx = ((deg % scaleLen) + scaleLen) % scaleLen;
+    return rootMidi() + scale[idx] + octaveShift * 12 + step.octave * 12 + params.octave.value * 12;
+  }
+
+  function midiToFreq(midi) {
+    return 440 * Math.pow(2, (midi - 69) / 12);
+  }
+
+  function midiName(midi) {
+    const pc = ((midi % 12) + 12) % 12;
+    const oct = Math.floor(midi / 12) - 1;
+    return `${NOTE_NAMES[pc]}${oct}`;
+  }
+
+  function getPatch() {
+    return {
+      bpm: params.bpm.value,
+      waveform: $("waveform").value,
+      cutoff: params.cutoff.value,
+      resonance: params.resonance.value,
+      filterEnv: params.filterEnv.value,
+      drive: params.drive.value,
+      tone: params.tone.value,
+      attack: params.attack.value / 1000,
+      decay: params.decay.value / 1000,
+      sustain: params.sustain.value,
+      release: params.release.value / 1000,
+      gateLen: params.gateLen.value,
+      gain: params.gain.value
+    };
+  }
+
+  function stepSeconds() {
+    return 60 / params.bpm.value / 4;
+  }
+
+  function start() {
+    if (running) return;
+    running = true;
+    currentStep = -1;
+    oneBarRemaining = 0;
+    startTime = performance.now() / 1000;
+    lastStepTime = startTime;
+    updateUI();
+    tick();
+    restartClock();
+    startRenderLoop();
+  }
+
+  function stop() {
+    running = false;
+    if (timer) clearInterval(timer);
+    timer = null;
+    if (renderLoop) cancelAnimationFrame(renderLoop);
+    renderLoop = 0;
+    currentStep = -1;
+    updateSeqUI();
+    updateUI();
+    renderAll();
+  }
+
+  function restartClock() {
+    if (timer) clearInterval(timer);
+    if (!running) return;
+    timer = setInterval(tick, stepSeconds() * 1000);
+  }
+
+  async function ensureAudio() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state !== "running") await audioCtx.resume();
+  }
+
+  async function tick() {
+    await ensureAudio();
+
+    currentStep = (currentStep + 1) % 16;
+    lastStepTime = performance.now() / 1000;
+    const st = steps[currentStep];
+
+    if (st.on) {
+      triggerNote(st, audioCtx.currentTime + 0.005);
+    }
+
+    updateSeqUI();
+    updateUI();
+
+    if (oneBarRemaining > 0) {
+      oneBarRemaining--;
+      if (oneBarRemaining <= 0) stop();
+    }
+  }
+
+  function oneBar() {
+    if (!running) {
+      running = true;
+      currentStep = -1;
+      oneBarRemaining = 16;
+      startTime = performance.now() / 1000;
+      lastStepTime = startTime;
+      updateUI();
+      tick();
+      restartClock();
+      startRenderLoop();
+    } else {
+      oneBarRemaining = 16;
+    }
+  }
+
+  function triggerNote(st, now) {
+    const patch = getPatch();
+    const freq = midiToFreq(stepMidi(st));
+    const gate = stepSeconds() * patch.gateLen;
+    const stopAt = now + gate + patch.release + 0.08;
+
+    const osc = audioCtx.createOscillator();
+    osc.type = patch.waveform;
+    osc.frequency.setValueAtTime(freq, now);
+
+    const sub = audioCtx.createOscillator();
+    sub.type = "sine";
+    sub.frequency.setValueAtTime(freq / 2, now);
+
+    const oscGain = audioCtx.createGain();
+    const subGain = audioCtx.createGain();
+    oscGain.gain.value = 0.72;
+    subGain.gain.value = 0.26;
+
+    const filter = audioCtx.createBiquadFilter();
+    const filter2 = audioCtx.createBiquadFilter();
+    filter.type = "lowpass";
+    filter2.type = "lowpass";
+    filter.Q.setValueAtTime(Math.max(0.1, patch.resonance), now);
+    filter2.Q.setValueAtTime(Math.max(0.1, patch.resonance * 0.45), now);
+    scheduleFilter(filter.frequency, now, patch, gate);
+    scheduleFilter(filter2.frequency, now, patch, gate);
+
+    const shaper = audioCtx.createWaveShaper();
+    shaper.curve = makeDistortionCurve(patch.drive);
+    shaper.oversample = "2x";
+
+    const tone = audioCtx.createBiquadFilter();
+    tone.type = "lowpass";
+    tone.frequency.value = 900 + patch.tone * 4200;
+    tone.Q.value = 0.3;
+
+    const vca = audioCtx.createGain();
+    const master = audioCtx.createGain();
+    master.gain.value = patch.gain;
+
+    scheduleADSR(vca.gain, now, patch.attack, patch.decay, patch.sustain, patch.release, gate, 1);
+
+    osc.connect(oscGain);
+    sub.connect(subGain);
+    oscGain.connect(filter);
+    subGain.connect(filter);
+    filter.connect(filter2);
+    filter2.connect(shaper);
+    shaper.connect(tone);
+    tone.connect(vca);
+    vca.connect(master);
+    master.connect(audioCtx.destination);
+
+    osc.start(now);
+    sub.start(now);
+    osc.stop(stopAt);
+    sub.stop(stopAt);
+  }
+
+  function scheduleADSR(param, now, A, D, S, R, gate, peak) {
+    const eps = 0.0001;
+    A = Math.max(A, 0.001);
+    D = Math.max(D, 0.001);
+    R = Math.max(R, 0.001);
+
+    param.cancelScheduledValues(now);
+    param.setValueAtTime(eps, now);
+    param.exponentialRampToValueAtTime(Math.max(eps, peak), now + A);
+    param.exponentialRampToValueAtTime(Math.max(eps, S * peak), now + A + D);
+    param.setValueAtTime(Math.max(eps, S * peak), now + gate);
+    param.exponentialRampToValueAtTime(eps, now + gate + R);
+  }
+
+  function scheduleFilter(param, now, patch, gate) {
+    const base = clamp(patch.cutoff, 30, 9000);
+    const high = clamp(base + patch.filterEnv * 5200, 35, 11000);
+    const eps = 0.001;
+    const A = Math.max(patch.attack, eps);
+    const D = Math.max(patch.decay * 0.75, eps);
+
+    param.cancelScheduledValues(now);
+    param.setValueAtTime(base, now);
+    param.exponentialRampToValueAtTime(high, now + A);
+    param.exponentialRampToValueAtTime(base, now + A + D);
+    param.setValueAtTime(base, now + gate);
+  }
+
+  function makeDistortionCurve(drive) {
+    const n = 2048;
+    const curve = new Float32Array(n);
+    const amount = 1 + drive * 42;
+
+    for (let i = 0; i < n; i++) {
+      const x = i * 2 / n - 1;
+      curve[i] = Math.tanh(x * amount) / Math.tanh(amount);
+    }
+
+    return curve;
+  }
+
+  function envAt(t, A, D, S, R, gate) {
     const eps = 1e-9;
     A = Math.max(A, eps);
     D = Math.max(D, eps);
@@ -797,24 +1233,78 @@
     if (t < A) return t / A;
     if (t < A + D) {
       const u = (t - A) / D;
-      return 1 + (S - 1) * easeOutExp(u);
+      return 1 + (S - 1) * (1 - Math.pow(2, -8 * u));
     }
     if (t < gate) return S;
 
-    const startVal = adsrValue(Math.min(gate, gate - 1e-6), A, D, S, R, 999);
+    const start = S;
     const u = (t - gate) / R;
     if (u >= 1) return 0;
-    return startVal * (1 - easeOutExp(u));
+    return start * (1 - (1 - Math.pow(2, -8 * u)));
+  }
+
+  function simulateBar(sampleRate = 44100) {
+    const patch = getPatch();
+    const stepDur = stepSeconds();
+    const total = stepDur * 16;
+    const n = Math.floor(total * sampleRate);
+    const data = new Float32Array(n);
+    const cv = new Float32Array(n);
+    const gates = new Float32Array(n);
+
+    let activeVoices = [];
+
+    for (let i = 0; i < n; i++) {
+      const t = i / sampleRate;
+      const stepIndex = Math.min(15, Math.floor(t / stepDur));
+      const local = t - stepIndex * stepDur;
+      const st = steps[stepIndex];
+
+      if (Math.abs(local) < 1 / sampleRate && st.on) {
+        activeVoices.push({
+          phase: 0,
+          phaseSub: 0,
+          freq: midiToFreq(stepMidi(st)),
+          start: t,
+          gate: stepDur * patch.gateLen
+        });
+      }
+
+      let y = 0;
+      activeVoices = activeVoices.filter(v => t - v.start < v.gate + patch.release + 0.08);
+
+      for (const v of activeVoices) {
+        const vt = t - v.start;
+        const amp = envAt(vt, patch.attack, patch.decay, patch.sustain, patch.release, v.gate);
+        v.phase += 2 * Math.PI * v.freq / sampleRate;
+        v.phaseSub += 2 * Math.PI * (v.freq / 2) / sampleRate;
+
+        let x = oscSample(v.phase, patch.waveform) * 0.72 + Math.sin(v.phaseSub) * 0.26;
+        x = saturate(x, patch.drive);
+        y += x * amp * patch.gain;
+      }
+
+      data[i] = clamp(y, -1, 1);
+
+      if (st.on) {
+        const midi = stepMidi(st);
+        cv[i] = clamp((midi - 24) / 36, 0, 1);
+        gates[i] = local < stepDur * patch.gateLen ? 1 : 0;
+      }
+    }
+
+    return { data, cv, gates, sampleRate, total };
   }
 
   function oscSample(phase, type) {
     const p = phase / (2 * Math.PI);
     const frac = p - Math.floor(p);
+
     switch (type) {
       case "square": return frac < 0.5 ? 1 : -1;
-      case "sawtooth": return 2 * frac - 1;
       case "triangle": return 1 - 4 * Math.abs(frac - 0.5);
-      default: return Math.sin(phase);
+      case "sine": return Math.sin(phase);
+      default: return 2 * frac - 1;
     }
   }
 
@@ -823,166 +1313,10 @@
     return Math.tanh(x * amount) / Math.tanh(amount);
   }
 
-  function simulateKick(patch, seconds = 1.25, sampleRate = 44100) {
-    const n = Math.floor(seconds * sampleRate);
-    const data = new Float32Array(n);
-    const ampEnv = new Float32Array(n);
-    const pitchEnv = new Float32Array(n);
-    const freqTrace = new Float32Array(n);
-    let phase = 0;
-
-    for (let i = 0; i < n; i++) {
-      const t = i / sampleRate;
-      const aEnv = adsrValue(t, patch.aA, patch.aD, patch.aS, patch.aR, patch.duration);
-      const pEnv = adsrValue(t, patch.pA, patch.pD, patch.pS, patch.pR, patch.duration);
-
-      const semis = patch.pitchAmt * pEnv;
-      const f = clamp(patch.baseFreq * Math.pow(2, semis / 12), 12, 1500);
-      phase += 2 * Math.PI * f / sampleRate;
-
-      let x = oscSample(phase, patch.waveform);
-
-      const clickTime = 0.006;
-      if (t < clickTime) {
-        const clickEnv = 1 - t / clickTime;
-        const click = (Math.random() * 2 - 1) * clickEnv * patch.clickLevel;
-        x = x * (1 - patch.clickLevel) + click;
-      }
-
-      x = saturate(x, patch.drive);
-      data[i] = x * aEnv * patch.gain;
-      ampEnv[i] = aEnv;
-      pitchEnv[i] = pEnv;
-      freqTrace[i] = f;
-    }
-
-    return { data, ampEnv, pitchEnv, freqTrace, sampleRate };
-  }
-
-  function metrics(sim, patch) {
-    let peak = 0;
-    let sumSq = 0;
-
-    for (const x of sim.data) {
-      const ax = Math.abs(x);
-      if (ax > peak) peak = ax;
-      sumSq += x * x;
-    }
-
-    const rms = Math.sqrt(sumSq / sim.data.length);
-    const threshold = Math.max(0.002, peak * 0.08);
-    let lastAudible = 0;
-
-    for (let i = 0; i < sim.data.length; i++) {
-      if (Math.abs(sim.data[i]) > threshold) lastAudible = i;
-    }
-
-    const first30 = sim.freqTrace.slice(0, Math.floor(0.03 * sim.sampleRate));
-    const drop = Math.max(...first30) - patch.baseFreq;
-
-    return {
-      peak,
-      rms,
-      bodyLength: lastAudible / sim.sampleRate,
-      drop
-    };
-  }
-
-  function drawScope(sim, patch) {
-    const canvas = $("scopeCanvas");
-    const ctx = canvas.getContext("2d");
-    const w = canvas.width;
-    const h = canvas.height;
-    ctx.clearRect(0, 0, w, h);
-
-    drawScopeGrid(ctx, w, h);
-
-    const traceEnd = Math.min(1.15, Math.max(patch.duration + patch.aR + 0.04, 0.2));
-    const maxIndex = Math.min(sim.data.length - 1, Math.floor(traceEnd * sim.sampleRate));
-    const mid = h / 2;
-
-    ctx.strokeStyle = "rgba(222,204,2,0.95)";
-    ctx.lineWidth = 3.0;
-    ctx.beginPath();
-
-    const samplesPerPixel = Math.max(1, Math.floor(maxIndex / w));
-    for (let x = 0; x < w; x++) {
-      const start = x * samplesPerPixel;
-      const end = Math.min(maxIndex, start + samplesPerPixel);
-      let min = 1;
-      let max = -1;
-
-      for (let i = start; i < end; i++) {
-        if (sim.data[i] < min) min = sim.data[i];
-        if (sim.data[i] > max) max = sim.data[i];
-      }
-
-      const y1 = mid - max * (h * 0.42);
-      const y2 = mid - min * (h * 0.42);
-      if (x === 0) ctx.moveTo(x, y1);
-      ctx.lineTo(x, y1);
-      ctx.lineTo(x, y2);
-    }
-
-    ctx.stroke();
-
-    ctx.strokeStyle = "rgba(255,255,255,0.25)";
-    ctx.beginPath();
-    ctx.moveTo(0, mid);
-    ctx.lineTo(w, mid);
-    ctx.stroke();
-
-    ctx.fillStyle = "rgba(255,255,255,0.65)";
-    ctx.font = "12px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace";
-    ctx.fillText(`${Math.round(traceEnd * 1000)} ms`, w - 70, h - 12);
-  }
-
-  function drawEnv(sim, patch) {
-    const canvas = $("envCanvas");
-    const ctx = canvas.getContext("2d");
-    const w = canvas.width;
-    const h = canvas.height;
-    ctx.clearRect(0, 0, w, h);
-
-    drawScopeGrid(ctx, w, h);
-
-    const total = Math.max(patch.duration + patch.aR, patch.duration + patch.pR, patch.aA + patch.aD, patch.pA + patch.pD, 0.25) + 0.04;
-
-    const plot = (arr, color) => {
-      ctx.strokeStyle = color;
-      ctx.lineWidth = 4;
-      ctx.beginPath();
-
-      for (let x = 0; x < w; x++) {
-        const t = x / w * total;
-        const i = Math.min(arr.length - 1, Math.floor(t * sim.sampleRate));
-        const y = h - 14 - arr[i] * (h - 28);
-        if (x === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-      }
-
-      ctx.stroke();
-    };
-
-    plot(sim.ampEnv, "rgba(222,204,2,0.95)");
-    plot(sim.pitchEnv, "rgba(51,131,200,0.95)");
-
-    const gateX = patch.duration / total * w;
-    ctx.strokeStyle = "rgba(255,255,255,0.45)";
-    ctx.setLineDash([4, 4]);
-    ctx.beginPath();
-    ctx.moveTo(gateX, 0);
-    ctx.lineTo(gateX, h);
-    ctx.stroke();
-    ctx.setLineDash([]);
-
-  }
-
-  function drawScopeGrid(ctx, w, h) {
+  function drawGrid(ctx, w, h) {
     ctx.fillStyle = "#050608";
     ctx.fillRect(0, 0, w, h);
-
-    ctx.strokeStyle = "rgba(222,204,2,0.10)";
+    ctx.strokeStyle = "rgba(214,58,50,0.12)";
     ctx.lineWidth = 1;
 
     for (let x = 0; x <= w; x += 28) {
@@ -998,6 +1332,194 @@
       ctx.lineTo(w, y);
       ctx.stroke();
     }
+  }
+
+  function barSeconds() {
+    return stepSeconds() * 16;
+  }
+
+  function playheadX(width) {
+    if (!running || currentStep < 0) return null;
+
+    const localStepProgress = clamp(
+      (performance.now() / 1000 - lastStepTime) / stepSeconds(),
+      0,
+      0.999
+    );
+
+    return ((currentStep + localStepProgress) / 16) * width;
+  }
+
+  function drawPlayhead(ctx, x, h) {
+    if (x === null) return;
+
+    ctx.save();
+    ctx.strokeStyle = "rgba(255,255,255,0.95)";
+    ctx.lineWidth = 2;
+    ctx.setLineDash([7, 5]);
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, h);
+    ctx.stroke();
+
+    ctx.setLineDash([]);
+    ctx.strokeStyle = "rgba(214,58,50,0.95)";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(x + 3, 0);
+    ctx.lineTo(x + 3, h);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawWave(sim) {
+    const canvas = $("waveCanvas");
+    const ctx = canvas.getContext("2d");
+    const w = canvas.width;
+    const h = canvas.height;
+    drawGrid(ctx, w, h);
+
+    const mid = h / 2;
+    const samplesPerPixel = Math.max(1, Math.floor(sim.data.length / w));
+
+    ctx.strokeStyle = "rgba(255,80,71,0.96)";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+
+    for (let x = 0; x < w; x++) {
+      const start = x * samplesPerPixel;
+      const end = Math.min(sim.data.length, start + samplesPerPixel);
+      let min = 1;
+      let max = -1;
+
+      for (let i = start; i < end; i++) {
+        if (sim.data[i] < min) min = sim.data[i];
+        if (sim.data[i] > max) max = sim.data[i];
+      }
+
+      const y1 = mid - max * h * 0.42;
+      const y2 = mid - min * h * 0.42;
+      if (x === 0) ctx.moveTo(x, y1);
+      ctx.lineTo(x, y1);
+      ctx.lineTo(x, y2);
+    }
+
+    ctx.stroke();
+
+    ctx.strokeStyle = "rgba(255,255,255,0.22)";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(0, mid);
+    ctx.lineTo(w, mid);
+    ctx.stroke();
+
+    drawPlayhead(ctx, playheadX(w), h);
+  }
+
+  function drawSeq(sim) {
+    const canvas = $("seqCanvas");
+    const ctx = canvas.getContext("2d");
+    const w = canvas.width;
+    const h = canvas.height;
+    drawGrid(ctx, w, h);
+
+    const stepW = w / 16;
+
+    for (let i = 0; i < 16; i++) {
+      if (i === currentStep) {
+        ctx.fillStyle = "rgba(214,58,50,0.20)";
+        ctx.fillRect(i * stepW, 0, stepW, h);
+      }
+
+      ctx.strokeStyle = "rgba(255,255,255,0.20)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(i * stepW, 0);
+      ctx.lineTo(i * stepW, h);
+      ctx.stroke();
+
+      const st = steps[i];
+      if (st.on) {
+        const midi = stepMidi(st);
+        const y = h - 28 - clamp((midi - 24) / 36, 0, 1) * (h - 56);
+        ctx.fillStyle = "rgba(255,80,71,0.98)";
+        ctx.beginPath();
+        ctx.arc(i * stepW + stepW / 2, y, 5, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = "rgba(255,255,255,0.78)";
+        ctx.font = "11px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace";
+        ctx.fillText(midiName(midi), i * stepW + 4, y - 9);
+      }
+    }
+
+    ctx.strokeStyle = "rgba(55,128,202,0.96)";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+
+    for (let x = 0; x < w; x++) {
+      const i = Math.min(sim.cv.length - 1, Math.floor(x / w * sim.cv.length));
+      const y = h - 28 - sim.cv[i] * (h - 56);
+      if (x === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+
+    ctx.stroke();
+
+    ctx.strokeStyle = "rgba(63,157,98,0.96)";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+
+    for (let x = 0; x < w; x++) {
+      const i = Math.min(sim.gates.length - 1, Math.floor(x / w * sim.gates.length));
+      const y = h - 14 - sim.gates[i] * 34;
+      if (x === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+
+    ctx.stroke();
+
+    drawPlayhead(ctx, playheadX(w), h);
+  }
+
+  function renderAll() {
+    const sim = simulateBar();
+    lastSim = sim;
+    drawWave(sim);
+    drawSeq(sim);
+
+    let peak = 0;
+    for (const x of sim.data) peak = Math.max(peak, Math.abs(x));
+    $("peakMetric").textContent = peak.toFixed(3);
+
+    updateUI();
+
+    if (!animation) {
+      animation = requestAnimationFrame(() => {
+        animation = 0;
+        drawPatchCables();
+      });
+    }
+  }
+
+  function startRenderLoop() {
+    if (renderLoop) return;
+
+    const loop = () => {
+      if (!running) {
+        renderLoop = 0;
+        return;
+      }
+
+      if (lastSim) {
+        drawWave(lastSim);
+        drawSeq(lastSim);
+      }
+
+      renderLoop = requestAnimationFrame(loop);
+    };
+
+    renderLoop = requestAnimationFrame(loop);
   }
 
   function drawPatchCables() {
@@ -1029,37 +1551,14 @@
       const dy = b.y - a.y;
       const dist = Math.hypot(dx, dy);
       const nx = dist ? -dy / dist : 0;
-      const ny = dist ? dx / dist : 0;
-
-      /*
-        The cable is drawn as two cubic Bezier segments meeting at a low midpoint.
-        This makes the patch cord hang like a loose rope instead of taking the
-        shortest smooth path between jacks.
-      */
       const mid = {
         x: (a.x + b.x) / 2 + nx * sidePull,
         y: Math.max(a.y, b.y) + sag
       };
-
-      const c1 = {
-        x: a.x + dx * 0.12 + nx * sidePull * 0.18,
-        y: a.y + sag * 0.18
-      };
-
-      const c2 = {
-        x: mid.x - dx * 0.10,
-        y: mid.y
-      };
-
-      const c3 = {
-        x: mid.x + dx * 0.10,
-        y: mid.y
-      };
-
-      const c4 = {
-        x: b.x - dx * 0.12 + nx * sidePull * 0.18,
-        y: b.y + sag * 0.18
-      };
+      const c1 = { x: a.x + dx * 0.12 + nx * sidePull * 0.18, y: a.y + sag * 0.18 };
+      const c2 = { x: mid.x - dx * 0.10, y: mid.y };
+      const c3 = { x: mid.x + dx * 0.10, y: mid.y };
+      const c4 = { x: b.x - dx * 0.12 + nx * sidePull * 0.18, y: b.y + sag * 0.18 };
 
       ctx.beginPath();
       ctx.moveTo(a.x, a.y);
@@ -1067,113 +1566,7 @@
       ctx.bezierCurveTo(c3.x, c3.y, c4.x, c4.y, b.x, b.y);
     }
 
-    const cable = (from, to, color, sag = 120, sidePull = 0) => {
-      const a = center(from);
-      const b = center(to);
-
-      // Soft contact shadow, making the cable read as being above the panels.
-      ctx.save();
-      ctx.lineCap = "round";
-      ctx.lineJoin = "round";
-      ctx.shadowColor = "rgba(0,0,0,0.65)";
-      ctx.shadowBlur = 14;
-      ctx.shadowOffsetY = 7;
-      ctx.strokeStyle = "rgba(0,0,0,0.45)";
-      ctx.lineWidth = 13;
-      drawCablePath(ctx, a, b, sag, sidePull);
-      ctx.stroke();
-      ctx.restore();
-
-      // Dark rubber undercoat.
-      ctx.save();
-      ctx.lineCap = "round";
-      ctx.lineJoin = "round";
-      ctx.strokeStyle = "rgba(14,15,18,0.96)";
-      ctx.lineWidth = 10;
-      drawCablePath(ctx, a, b, sag, sidePull);
-      ctx.stroke();
-      ctx.restore();
-
-      // Main cable color.
-      ctx.save();
-      ctx.lineCap = "round";
-      ctx.lineJoin = "round";
-      ctx.strokeStyle = color;
-      ctx.lineWidth = 7;
-      drawCablePath(ctx, a, b, sag, sidePull);
-      ctx.stroke();
-
-      // Top highlight, slightly thinner and offset upward.
-      ctx.globalAlpha = 0.36;
-      ctx.strokeStyle = "rgba(255,255,255,0.85)";
-      ctx.lineWidth = 1.8;
-      ctx.translate(0, -2);
-      drawCablePath(ctx, a, b, sag, sidePull);
-      ctx.stroke();
-      ctx.restore();
-
-      // Metal plug collars drawn on top of the cable at both jack ends.
-      for (const p of [a, b]) {
-        ctx.save();
-        ctx.fillStyle = "rgba(210,214,222,0.92)";
-        ctx.strokeStyle = "rgba(0,0,0,0.65)";
-        ctx.lineWidth = 1.2;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, 8.5, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.stroke();
-
-        ctx.fillStyle = "rgba(16,17,22,0.95)";
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, 4.2, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
-      }
-    };
-
-    const shortCable = (from, to, color, lift = 42) => {
-      const a = center(from);
-      const b = center(to);
-      const dx = b.x - a.x;
-      const midX = (a.x + b.x) / 2;
-      const topY = Math.min(a.y, b.y) - lift;
-
-      const path = () => {
-        ctx.beginPath();
-        ctx.moveTo(a.x, a.y);
-        ctx.bezierCurveTo(a.x + dx * 0.20, topY, midX - dx * 0.12, topY, midX, topY);
-        ctx.bezierCurveTo(midX + dx * 0.12, topY, b.x - dx * 0.20, topY, b.x, b.y);
-      };
-
-      const stroke = (width, strokeStyle, shadow = false) => {
-        ctx.save();
-        ctx.lineCap = "round";
-        ctx.lineJoin = "round";
-        if (shadow) {
-          ctx.shadowColor = "rgba(0,0,0,0.65)";
-          ctx.shadowBlur = 12;
-          ctx.shadowOffsetY = 5;
-        }
-        ctx.strokeStyle = strokeStyle;
-        ctx.lineWidth = width;
-        path();
-        ctx.stroke();
-        ctx.restore();
-      };
-
-      stroke(12, "rgba(0,0,0,0.42)", true);
-      stroke(9, "rgba(14,15,18,0.96)");
-      stroke(6, color);
-
-      ctx.save();
-      ctx.globalAlpha = 0.36;
-      ctx.strokeStyle = "rgba(255,255,255,0.85)";
-      ctx.lineWidth = 1.6;
-      ctx.translate(0, -2);
-      path();
-      ctx.stroke();
-      ctx.restore();
-
+    const plug = (ctx, a, b) => {
       for (const p of [a, b]) {
         ctx.save();
         ctx.fillStyle = "rgba(210,214,222,0.92)";
@@ -1192,188 +1585,147 @@
       }
     };
 
-    cable("jack-gate-out-a", "jack-gate-pitch", "rgba(197,66,66,0.98)", 118, -22);
-    cable("jack-gate-out-b", "jack-gate-amp", "rgba(197,66,66,0.98)", 168, 28);
-    cable("jack-pitch-out", "jack-vco-cv", "rgba(51,131,200,0.98)", 112, -16);
-    cable("jack-vco-out", "jack-drive-in", "rgba(222,204,2,0.98)", 138, 22);
-    cable("jack-drive-out", "jack-vca-in", "rgba(222,204,2,0.98)", 158, -10);
-    cable("jack-ampenv-out", "jack-vca-cv", "rgba(63,157,98,0.98)", 124, 24);
-    cable("jack-vca-out", "jack-out-in", "rgba(222,204,2,0.98)", 146, 18);
-    shortCable("jack-main-out", "jack-scope-in", "rgba(222,204,2,0.98)", 36);
-  }
+    const cable = (from, to, color, sag = 120, sidePull = 0) => {
+      const a = center(from);
+      const b = center(to);
 
-  function renderAll() {
-    const patch = getPatch();
-    const sim = simulateKick(patch, 1.25, 44100);
-    lastSim = sim;
+      ctx.save();
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      ctx.shadowColor = "rgba(0,0,0,0.65)";
+      ctx.shadowBlur = 14;
+      ctx.shadowOffsetY = 7;
+      ctx.strokeStyle = "rgba(0,0,0,0.45)";
+      ctx.lineWidth = 13;
+      drawCablePath(ctx, a, b, sag, sidePull);
+      ctx.stroke();
+      ctx.restore();
 
-    const m = metrics(sim, patch);
-    drawScope(sim, patch);
-    drawEnv(sim, patch);
+      ctx.save();
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      ctx.strokeStyle = "rgba(14,15,18,0.96)";
+      ctx.lineWidth = 10;
+      drawCablePath(ctx, a, b, sag, sidePull);
+      ctx.stroke();
+      ctx.restore();
 
-    $("peakMetric").textContent = m.peak.toFixed(3);
-    $("rmsMetric").textContent = m.rms.toFixed(3);
-    $("bodyMetric").textContent = `${Math.round(m.bodyLength * 1000)} ms`;
-    $("dropMetric").textContent = `${Math.round(m.drop)} Hz`;
+      ctx.save();
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 7;
+      drawCablePath(ctx, a, b, sag, sidePull);
+      ctx.stroke();
 
-    if (!animation) {
-      animation = requestAnimationFrame(() => {
-        animation = 0;
-        drawPatchCables();
-      });
-    }
-  }
+      ctx.globalAlpha = 0.34;
+      ctx.strokeStyle = "rgba(255,255,255,0.85)";
+      ctx.lineWidth = 1.8;
+      ctx.translate(0, -2);
+      drawCablePath(ctx, a, b, sag, sidePull);
+      ctx.stroke();
+      ctx.restore();
 
-  async function playKick() {
-    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    if (audioCtx.state !== "running") await audioCtx.resume();
-
-    const patch = getPatch();
-    const now = audioCtx.currentTime + 0.01;
-    const gate = patch.duration;
-    const stopAt = now + Math.max(gate + patch.aR + 0.08, patch.pA + patch.pD + patch.pR + 0.08);
-
-    const osc = audioCtx.createOscillator();
-    osc.type = patch.waveform;
-
-    const vca = audioCtx.createGain();
-    const master = audioCtx.createGain();
-    const shaper = audioCtx.createWaveShaper();
-
-    shaper.curve = makeDistortionCurve(patch.drive);
-    shaper.oversample = "2x";
-
-    const click = audioCtx.createBufferSource();
-    const clickGain = audioCtx.createGain();
-    const clickBuffer = audioCtx.createBuffer(1, Math.floor(audioCtx.sampleRate * 0.006), audioCtx.sampleRate);
-    const ch = clickBuffer.getChannelData(0);
-
-    for (let i = 0; i < ch.length; i++) {
-      ch[i] = (Math.random() * 2 - 1) * (1 - i / ch.length);
-    }
-
-    click.buffer = clickBuffer;
-
-    master.gain.value = patch.gain;
-
-    vca.gain.setValueAtTime(0.0001, now);
-    scheduleADSR(vca.gain, now, patch.aA, patch.aD, patch.aS, patch.aR, gate, 1);
-
-    osc.frequency.setValueAtTime(patch.baseFreq, now);
-    schedulePitchADSR(osc.frequency, now, patch);
-
-    clickGain.gain.setValueAtTime(patch.clickLevel, now);
-    clickGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.008);
-
-    osc.connect(shaper);
-    shaper.connect(vca);
-    click.connect(clickGain);
-    clickGain.connect(vca);
-    vca.connect(master);
-    master.connect(audioCtx.destination);
-
-    osc.start(now);
-    click.start(now);
-    osc.stop(stopAt);
-    click.stop(now + 0.012);
-  }
-
-  function scheduleADSR(param, now, A, D, S, R, gate, peak) {
-    const eps = 0.0001;
-    A = Math.max(A, 0.001);
-    D = Math.max(D, 0.001);
-    R = Math.max(R, 0.001);
-
-    param.cancelScheduledValues(now);
-    param.setValueAtTime(eps, now);
-    param.exponentialRampToValueAtTime(Math.max(eps, peak), now + A);
-    param.exponentialRampToValueAtTime(Math.max(eps, S * peak), now + A + D);
-    param.setValueAtTime(Math.max(eps, S * peak), now + gate);
-    param.exponentialRampToValueAtTime(eps, now + gate + R);
-  }
-
-  function schedulePitchADSR(freqParam, now, patch) {
-    const eps = 0.001;
-    const A = Math.max(patch.pA, eps);
-    const D = Math.max(patch.pD, eps);
-    const R = Math.max(patch.pR, eps);
-    const high = patch.baseFreq * Math.pow(2, patch.pitchAmt / 12);
-    const sustain = patch.baseFreq * Math.pow(2, (patch.pitchAmt * patch.pS) / 12);
-
-    freqParam.cancelScheduledValues(now);
-    freqParam.setValueAtTime(Math.max(8, patch.baseFreq), now);
-
-    if (patch.pA <= 0.001) {
-      freqParam.setValueAtTime(high, now);
-    } else {
-      freqParam.exponentialRampToValueAtTime(high, now + A);
-    }
-
-    freqParam.exponentialRampToValueAtTime(Math.max(8, sustain), now + A + D);
-    freqParam.setValueAtTime(Math.max(8, sustain), now + patch.duration);
-    freqParam.exponentialRampToValueAtTime(Math.max(8, patch.baseFreq), now + patch.duration + R);
-  }
-
-  function makeDistortionCurve(drive) {
-    const n = 2048;
-    const curve = new Float32Array(n);
-    const amount = 1 + drive * 40;
-
-    for (let i = 0; i < n; i++) {
-      const x = i * 2 / n - 1;
-      curve[i] = Math.tanh(x * amount) / Math.tanh(amount);
-    }
-
-    return curve;
-  }
-
-  function randomizePatch() {
-    const pick = (min, max, integer = true) => {
-      const v = min + Math.random() * (max - min);
-      return integer ? Math.round(v) : Number(v.toFixed(2));
+      plug(ctx, a, b);
     };
 
-    params.pitchAmt.value = pick(24, 76);
-    params.pA.value = pick(0, 6);
-    params.pD.value = pick(35, 180);
-    params.pS.value = Math.random() < 0.85 ? 0 : Number((Math.random() * 0.15).toFixed(2));
-    params.pR.value = pick(15, 120);
+    const shortCable = (from, to, color, lift = 42) => {
+      const a = center(from);
+      const b = center(to);
+      const dx = b.x - a.x;
+      const midX = (a.x + b.x) / 2;
+      const topY = Math.min(a.y, b.y) - lift;
 
-    params.aA.value = pick(0, 5);
-    params.aD.value = pick(120, 560);
-    params.aS.value = Math.random() < 0.8 ? 0 : Number((Math.random() * 0.18).toFixed(2));
-    params.aR.value = pick(40, 280);
-    params.duration.value = pick(250, 1000);
+      const path = () => {
+        ctx.beginPath();
+        ctx.moveTo(a.x, a.y);
+        ctx.bezierCurveTo(a.x + dx * 0.20, topY, midX - dx * 0.12, topY, midX, topY);
+        ctx.bezierCurveTo(midX + dx * 0.12, topY, b.x - dx * 0.20, topY, b.x, b.y);
+      };
 
-    params.baseFreq.value = pick(36, 62);
-    params.clickLevel.value = Number((Math.random() * 0.22).toFixed(2));
-    params.drive.value = Number((Math.random() * 0.55).toFixed(2));
+      const stroke = (width, style, shadow = false) => {
+        ctx.save();
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+        if (shadow) {
+          ctx.shadowColor = "rgba(0,0,0,0.65)";
+          ctx.shadowBlur = 12;
+          ctx.shadowOffsetY = 5;
+        }
+        ctx.strokeStyle = style;
+        ctx.lineWidth = width;
+        path();
+        ctx.stroke();
+        ctx.restore();
+      };
 
-    updateUI();
+      stroke(12, "rgba(0,0,0,0.42)", true);
+      stroke(9, "rgba(14,15,18,0.96)");
+      stroke(6, color);
+
+      ctx.save();
+      ctx.globalAlpha = 0.34;
+      ctx.strokeStyle = "rgba(255,255,255,0.85)";
+      ctx.lineWidth = 1.6;
+      ctx.translate(0, -2);
+      path();
+      ctx.stroke();
+      ctx.restore();
+
+      plug(ctx, a, b);
+    };
+
+    cable("jack-clock-out", "jack-seq-clock", "rgba(214,58,50,0.98)", 86, -14);
+    cable("jack-seq-cv", "jack-vco-cv", "rgba(55,128,202,0.98)", 116, -16);
+    cable("jack-seq-gate", "jack-env-gate", "rgba(63,157,98,0.98)", 128, 22);
+    cable("jack-vco-out", "jack-filter-in", "rgba(222,186,41,0.98)", 126, 20);
+    cable("jack-filter-out", "jack-drive-in", "rgba(222,186,41,0.98)", 132, -8);
+    cable("jack-drive-out", "jack-vca-in", "rgba(222,186,41,0.98)", 138, 12);
+    cable("jack-env-out", "jack-vca-cv", "rgba(63,157,98,0.98)", 102, -18);
+    cable("jack-seq-cv", "jack-scope-cv", "rgba(55,128,202,0.98)", 170, 34);
+    shortCable("jack-main-out", "jack-scope-in", "rgba(214,58,50,0.98)", 36);
+  }
+
+  function randomizeSequence() {
+    const scale = SCALES[$("scaleSelect").value] || SCALES.minor;
+    const common = [0, 0, 2, 3, 4, 5, 7, -2];
+
+    for (let i = 0; i < 16; i++) {
+      steps[i].on = Math.random() < (i % 4 === 0 ? 0.95 : 0.52);
+      steps[i].degree = common[Math.floor(Math.random() * common.length)];
+      if (Math.random() < 0.18) steps[i].degree += scale.length;
+      steps[i].octave = 0;
+
+    }
+
+    updateSeqUI();
     renderAll();
   }
 
-  $("playBtn").addEventListener("click", playKick);
-  $("modulePlayBtn").addEventListener("click", playKick);
-  $("gateTrigBtn").addEventListener("click", playKick);
-  $("randomBtn").addEventListener("click", randomizePatch);
+  $("startBtn").addEventListener("click", start);
+  $("stopBtn").addEventListener("click", stop);
+  $("oneBtn").addEventListener("click", oneBar);
+  $("randomBtn").addEventListener("click", randomizeSequence);
   $("waveform").addEventListener("input", renderAll);
+  $("rootSelect").addEventListener("input", renderAll);
+  $("scaleSelect").addEventListener("input", renderAll);
 
   window.addEventListener("keydown", (e) => {
     if (e.code === "Space" && !["INPUT", "SELECT", "BUTTON"].includes(document.activeElement.tagName)) {
       e.preventDefault();
-      playKick();
+      running ? stop() : start();
     }
   });
 
-  window.addEventListener("resize", () => {
-    drawPatchCables();
-  });
+  window.addEventListener("resize", drawPatchCables);
 
+  setupSequencerUI();
   setupKnobs();
+  setupNoteKnobs();
   updateUI();
   renderAll();
 })();
 </script>
 </body>
 </html>
+
