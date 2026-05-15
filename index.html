@@ -1,0 +1,1379 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Modular Kick Synth</title>
+<style>
+  :root {
+    --bg: #101116;
+    --rack: #242833;
+    --rail: #0b0c10;
+    --screw: #6f7480;
+    --panel: #d7d2c5;
+    --panel-dark: #2e333d;
+    --ink: #16181f;
+    --muted: #5f6470;
+    --yellow: #decc02;
+    --orange: #db7a23;
+    --blue: #3383c8;
+    --red: #c54242;
+    --green: #3f9d62;
+    --cable: #decc02;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background:
+      radial-gradient(circle at top left, rgba(222,204,2,0.08), transparent 30%),
+      linear-gradient(180deg, #171922, var(--bg));
+    color: #f0f2f5;
+    font: 13px/1.35 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    min-height: 100vh;
+  }
+
+  header {
+    max-width: 1500px;
+    margin: 0 auto;
+    padding: 20px 18px 8px;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: 22px;
+    letter-spacing: -0.02em;
+  }
+
+  .subtitle {
+    color: #aeb4c0;
+    margin-top: 4px;
+  }
+
+  main {
+    max-width: 1500px;
+    margin: 0 auto;
+    padding: 12px 18px 28px;
+  }
+
+  .toolbar {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+
+  button, select {
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 9px;
+    background: #12141b;
+    color: #f1f5f9;
+    padding: 9px 12px;
+    font: inherit;
+  }
+
+  button {
+    cursor: pointer;
+    font-weight: 700;
+  }
+
+  button:hover {
+    border-color: rgba(222,204,2,0.75);
+    background: #171a22;
+  }
+
+  .hint {
+    color: #aeb4c0;
+  }
+
+  .rack {
+    position: relative;
+    display: grid;
+    grid-template-columns: 105px 128px 143px 143px 128px 143px 128px minmax(520px, 1fr);
+    gap: 6px;
+    align-items: stretch;
+    min-height: 620px;
+    background:
+      linear-gradient(180deg, var(--rail) 0 18px, transparent 18px calc(100% - 18px), var(--rail) calc(100% - 18px)),
+      repeating-linear-gradient(90deg, rgba(255,255,255,0.035) 0 1px, transparent 1px 18px),
+      var(--rack);
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 12px;
+    padding: 28px 10px;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.42);
+    overflow: hidden;
+  }
+
+  .module {
+    position: relative;
+    background:
+      linear-gradient(90deg, rgba(255,255,255,0.18), transparent 7%, transparent 93%, rgba(0,0,0,0.18)),
+      var(--panel);
+    color: var(--ink);
+    border: 1px solid rgba(0,0,0,0.48);
+    border-radius: 4px;
+    min-height: 560px;
+    padding: 12px 10px 14px;
+    box-shadow:
+      inset 0 0 0 1px rgba(255,255,255,0.35),
+      0 8px 18px rgba(0,0,0,0.28);
+  }
+
+  .module.dark {
+    background:
+      linear-gradient(90deg, rgba(255,255,255,0.08), transparent 8%, transparent 92%, rgba(0,0,0,0.26)),
+      var(--panel-dark);
+    color: #eef2f6;
+  }
+
+  .screw {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle at 35% 35%, #c4c7ce 0 15%, var(--screw) 16% 70%, #2c3038 71%);
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,0.45);
+  }
+
+  .screw.tl { top: 6px; left: 6px; }
+  .screw.tr { top: 6px; right: 6px; }
+  .screw.bl { bottom: 6px; left: 6px; }
+  .screw.br { bottom: 6px; right: 6px; }
+
+  .module-title {
+    text-align: center;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    font-size: 13px;
+    padding: 6px 0 10px;
+    border-bottom: 2px solid rgba(0,0,0,0.25);
+    margin-bottom: 14px;
+  }
+
+  .dark .module-title {
+    border-bottom-color: rgba(255,255,255,0.22);
+  }
+
+  .brand {
+    text-align: center;
+    color: var(--muted);
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    margin-top: -7px;
+    margin-bottom: 12px;
+  }
+
+  .dark .brand { color: #aeb4c0; }
+
+  .control {
+    display: grid;
+    grid-template-columns: 1fr;
+    justify-items: center;
+    gap: 5px;
+    margin: 13px 0;
+  }
+
+  .control label {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .read {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .dark .read { color: #c7ccd4; }
+
+  .knob {
+    --angle: -135deg;
+    position: relative;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle at 35% 30%, #5a606b 0 9%, transparent 10%),
+      radial-gradient(circle, #272b33 0 54%, #0c0d12 55% 74%, #3c424d 75%);
+    border: 2px solid rgba(0,0,0,0.65);
+    box-shadow:
+      inset -4px -5px 8px rgba(0,0,0,0.55),
+      inset 3px 3px 7px rgba(255,255,255,0.18),
+      0 3px 8px rgba(0,0,0,0.32);
+    cursor: ns-resize;
+  }
+
+  .knob::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 7px;
+    width: 4px;
+    height: 18px;
+    border-radius: 3px;
+    background: var(--yellow);
+    transform-origin: 50% 20px;
+    transform: translateX(-50%) rotate(var(--angle));
+    box-shadow: 0 0 5px rgba(222,204,2,0.65);
+  }
+
+  .small-knob {
+    width: 38px;
+    height: 38px;
+  }
+
+  .jack-row {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin: 12px 0;
+  }
+
+  .jack-wrap {
+    display: grid;
+    justify-items: center;
+    gap: 5px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .jack {
+    position: relative;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle, #050507 0 23%, #c5c8ce 24% 38%, #2a2e36 39% 63%, #090a0d 64%);
+    border: 1px solid rgba(0,0,0,0.7);
+    box-shadow:
+      inset 0 0 6px rgba(0,0,0,0.9),
+      0 2px 5px rgba(0,0,0,0.35);
+  }
+
+  .jack.in { outline: 2px solid rgba(51,131,200,0.55); }
+  .jack.out { outline: 2px solid rgba(222,204,2,0.55); }
+
+  .divider {
+    height: 2px;
+    background: rgba(0,0,0,0.22);
+    margin: 14px 0;
+  }
+
+  .dark .divider { background: rgba(255,255,255,0.16); }
+
+  .cv-meter {
+    height: 120px;
+    width: 22px;
+    border-radius: 12px;
+    border: 1px solid rgba(0,0,0,0.55);
+    background: #171a20;
+    overflow: hidden;
+    position: relative;
+    box-shadow: inset 0 0 9px rgba(0,0,0,0.8);
+  }
+
+  .cv-meter span {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 45%;
+    background: linear-gradient(180deg, #fff06a, var(--yellow));
+  }
+
+  .scope {
+    background: #08090c;
+    border: 2px solid rgba(0,0,0,0.6);
+    border-radius: 7px;
+    padding: 8px;
+    min-width: 0;
+  }
+
+  canvas {
+    width: 100%;
+    display: block;
+    background:
+      linear-gradient(rgba(222,204,2,0.08) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(222,204,2,0.08) 1px, transparent 1px),
+      #050608;
+    background-size: 28px 28px;
+    border-radius: 4px;
+  }
+
+  #scopeCanvas { height: 240px; }
+  #envCanvas { height: 190px; }
+  #patchCanvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 20;
+    background: transparent;
+    background-image: none;
+    border: 0;
+    border-radius: 0;
+  }
+
+  .module {
+    z-index: 5;
+  }
+
+  .jack {
+    z-index: 25;
+  }
+
+  .metrics {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0,1fr));
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .metric {
+    border: 1px solid rgba(255,255,255,0.11);
+    background: rgba(255,255,255,0.045);
+    border-radius: 8px;
+    padding: 8px;
+  }
+
+  .metric b {
+    display: block;
+    color: #f8fafc;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .metric span {
+    color: #b7bfca;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+
+  .select-control {
+    width: 120px;
+    padding: 7px;
+    background: #171a20;
+    color: #eef2f6;
+    border-color: rgba(0,0,0,0.45);
+  }
+
+  .module-footer {
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    bottom: 24px;
+    text-align: center;
+    color: inherit;
+    opacity: 0.65;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    font-weight: 800;
+  }
+
+  .scope-title {
+    color: #decc02;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 12px;
+    margin-bottom: 7px;
+  }
+
+  @media (max-width: 1200px) {
+    .rack {
+      grid-template-columns: repeat(3, minmax(160px, 1fr));
+      overflow: auto;
+    }
+
+    .module {
+      min-height: 540px;
+    }
+
+    .scope-module {
+      grid-column: 1 / -1;
+    }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Modular Kick Synth</h1>
+  <div class="subtitle">A compact rack-style kick patch: gate source, pitch envelope, oscillator, drive, VCA, amplitude envelope, output, and scope.</div>
+</header>
+
+<main>
+  <div class="toolbar">
+    <button id="playBtn">Play Kick</button>
+    <button id="randomBtn">Randomize Patch</button>
+    <span class="hint">Shortcut: Spacebar plays the current patch.</span>
+  </div>
+
+  <section class="rack" id="rack">
+    <canvas id="patchCanvas"></canvas>
+
+
+    <div class="module" data-module="gate">
+      <i class="screw tl"></i><i class="screw tr"></i><i class="screw bl"></i><i class="screw br"></i>
+      <div class="module-title">GATE</div>
+      <div class="brand">TRIGGER SOURCE</div>
+
+      <div class="control">
+        <button id="gateTrigBtn">TRIG</button>
+        <div class="read">manual pulse</div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="jack-row">
+        <div class="jack-wrap">GATE OUT<div class="jack out" id="jack-gate-out-a"></div></div>
+      </div>
+
+      <div class="jack-row">
+        <div class="jack-wrap">MULT<div class="jack out" id="jack-gate-out-b"></div></div>
+      </div>
+
+      <div class="module-footer">ONE SHOT</div>
+    </div>
+
+    <div class="module" data-module="pitchEnv">
+      <i class="screw tl"></i><i class="screw tr"></i><i class="screw bl"></i><i class="screw br"></i>
+      <div class="module-title">PITCH ENV</div>
+      <div class="brand">CV GENERATOR</div>
+
+      <div class="control">
+        <label>Amount</label>
+        <div class="knob" data-param="pitchAmt"></div>
+        <div class="read" id="pitchAmtRead"></div>
+      </div>
+      <div class="control">
+        <label>Attack</label>
+        <div class="knob small-knob" data-param="pA"></div>
+        <div class="read" id="pARead"></div>
+      </div>
+      <div class="control">
+        <label>Decay</label>
+        <div class="knob" data-param="pD"></div>
+        <div class="read" id="pDRead"></div>
+      </div>
+      <div class="control">
+        <label>Sustain</label>
+        <div class="knob small-knob" data-param="pS"></div>
+        <div class="read" id="pSRead"></div>
+      </div>
+      <div class="control">
+        <label>Release</label>
+        <div class="knob small-knob" data-param="pR"></div>
+        <div class="read" id="pRRead"></div>
+      </div>
+
+      <div class="divider"></div>
+      <div class="jack-row">
+        <div class="jack-wrap">GATE<div class="jack in" id="jack-gate-pitch"></div></div>
+        <div class="jack-wrap">CV OUT<div class="jack out" id="jack-pitch-out"></div></div>
+      </div>
+      <div class="module-footer">EXP ADSR</div>
+    </div>
+
+    <div class="module" data-module="vco">
+      <i class="screw tl"></i><i class="screw tr"></i><i class="screw bl"></i><i class="screw br"></i>
+      <div class="module-title">VCO</div>
+      <div class="brand">AUDIO SOURCE</div>
+
+      <div class="control">
+        <label>Wave</label>
+        <select class="select-control" id="waveform">
+          <option value="sine">SINE</option>
+          <option value="triangle">TRIANGLE</option>
+          <option value="square">SQUARE</option>
+          <option value="sawtooth">SAW</option>
+        </select>
+        <div class="read">audio</div>
+      </div>
+
+      <div class="control">
+        <label>Base Freq</label>
+        <div class="knob" data-param="baseFreq"></div>
+        <div class="read" id="baseFreqRead"></div>
+      </div>
+
+      <div class="divider"></div>
+      <div class="jack-row">
+        <div class="jack-wrap">1V/OCT<div class="jack in" id="jack-vco-cv"></div></div>
+        <div class="jack-wrap">OUT<div class="jack out" id="jack-vco-out"></div></div>
+      </div>
+      <div class="module-footer">OSCILLATOR</div>
+    </div>
+
+    <div class="module" data-module="drive">
+      <i class="screw tl"></i><i class="screw tr"></i><i class="screw bl"></i><i class="screw br"></i>
+      <div class="module-title">DRIVE</div>
+      <div class="brand">SOFT SATURATOR</div>
+
+      <div class="control">
+        <label>Drive</label>
+        <div class="knob" data-param="drive"></div>
+        <div class="read" id="driveRead"></div>
+      </div>
+
+      <div class="control">
+        <label>Click</label>
+        <div class="knob" data-param="clickLevel"></div>
+        <div class="read" id="clickLevelRead"></div>
+      </div>
+
+      <div class="divider"></div>
+      <div class="jack-row">
+        <div class="jack-wrap">IN<div class="jack in" id="jack-drive-in"></div></div>
+        <div class="jack-wrap">OUT<div class="jack out" id="jack-drive-out"></div></div>
+      </div>
+      <div class="module-footer">TANH SHAPER</div>
+    </div>
+
+    <div class="module" data-module="ampEnv">
+      <i class="screw tl"></i><i class="screw tr"></i><i class="screw bl"></i><i class="screw br"></i>
+      <div class="module-title">AMP ENV</div>
+      <div class="brand">VCA CV</div>
+
+      <div class="control">
+        <label>Attack</label>
+        <div class="knob small-knob" data-param="aA"></div>
+        <div class="read" id="aARead"></div>
+      </div>
+      <div class="control">
+        <label>Decay</label>
+        <div class="knob" data-param="aD"></div>
+        <div class="read" id="aDRead"></div>
+      </div>
+      <div class="control">
+        <label>Sustain</label>
+        <div class="knob small-knob" data-param="aS"></div>
+        <div class="read" id="aSRead"></div>
+      </div>
+      <div class="control">
+        <label>Release</label>
+        <div class="knob small-knob" data-param="aR"></div>
+        <div class="read" id="aRRead"></div>
+      </div>
+
+      <div class="divider"></div>
+      <div class="jack-row">
+        <div class="jack-wrap">GATE<div class="jack in" id="jack-gate-amp"></div></div>
+        <div class="jack-wrap">CV OUT<div class="jack out" id="jack-ampenv-out"></div></div>
+      </div>
+      <div class="module-footer">EXP ADSR</div>
+    </div>
+
+    <div class="module" data-module="vca">
+      <i class="screw tl"></i><i class="screw tr"></i><i class="screw bl"></i><i class="screw br"></i>
+      <div class="module-title">VCA</div>
+      <div class="brand">AMPLIFIER</div>
+
+      <div class="control">
+        <label>Gate</label>
+        <div class="knob" data-param="duration"></div>
+        <div class="read" id="durationRead"></div>
+      </div>
+
+      <div class="control">
+        <label>CV Level</label>
+        <div class="cv-meter"><span id="cvMeter"></span></div>
+        <div class="read">0-5 V</div>
+      </div>
+
+      <div class="divider"></div>
+      <div class="jack-row">
+        <div class="jack-wrap">IN<div class="jack in" id="jack-vca-in"></div></div>
+        <div class="jack-wrap">CV<div class="jack in" id="jack-vca-cv"></div></div>
+        <div class="jack-wrap">OUT<div class="jack out" id="jack-vca-out"></div></div>
+      </div>
+      <div class="module-footer">LINEAR VCA</div>
+    </div>
+
+    <div class="module" data-module="out">
+      <i class="screw tl"></i><i class="screw tr"></i><i class="screw bl"></i><i class="screw br"></i>
+      <div class="module-title">OUTPUT</div>
+      <div class="brand">MASTER</div>
+
+      <div class="control">
+        <label>Gain</label>
+        <div class="knob" data-param="gain"></div>
+        <div class="read" id="gainRead"></div>
+      </div>
+
+      <div class="divider"></div>
+      <div class="jack-row">
+        <div class="jack-wrap">IN L<div class="jack in" id="jack-out-in"></div></div>
+        <div class="jack-wrap">MAIN<div class="jack out" id="jack-main-out"></div></div>
+      </div>
+
+      <div class="control">
+        <button id="modulePlayBtn">TRIG</button>
+      </div>
+
+      <div class="module-footer">AUDIO OUT</div>
+    </div>
+
+    <div class="module dark scope-module" data-module="scope">
+      <i class="screw tl"></i><i class="screw tr"></i><i class="screw bl"></i><i class="screw br"></i>
+      <div class="module-title">SCOPE</div>
+      <div class="brand">SIGNAL MONITOR</div>
+
+
+      <div class="jack-row">
+        <div class="jack-wrap">AUDIO IN<div class="jack in" id="jack-scope-in"></div></div>
+      </div>
+
+      <div class="scope">
+        <div class="scope-title">AUDIO WAVEFORM</div>
+        <canvas id="scopeCanvas" width="760" height="260"></canvas>
+      </div>
+
+      <div style="height:12px"></div>
+
+      <div class="scope">
+        <div class="scope-title">AMP CV + PITCH CV</div>
+        <canvas id="envCanvas" width="760" height="210"></canvas>
+      </div>
+
+      <div class="metrics">
+        <div class="metric"><b>Peak</b><span id="peakMetric">-</span></div>
+        <div class="metric"><b>RMS</b><span id="rmsMetric">-</span></div>
+        <div class="metric"><b>Body</b><span id="bodyMetric">-</span></div>
+        <div class="metric"><b>Drop</b><span id="dropMetric">-</span></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+(() => {
+  "use strict";
+
+  const $ = (id) => document.getElementById(id);
+
+  const params = {
+    pitchAmt: { value: 31, min: 0, max: 96, unit: "st", decimals: 0 },
+    pA: { value: 0, min: 0, max: 40, unit: "ms", decimals: 0 },
+    pD: { value: 31, min: 10, max: 350, unit: "ms", decimals: 0 },
+    pS: { value: 0, min: 0, max: 1, unit: "", decimals: 2 },
+    pR: { value: 30, min: 5, max: 350, unit: "ms", decimals: 0 },
+
+    baseFreq: { value: 34, min: 25, max: 80, unit: "Hz", decimals: 0 },
+    drive: { value: 0.18, min: 0, max: 1, unit: "", decimals: 2 },
+    clickLevel: { value: 0, min: 0, max: 0.45, unit: "", decimals: 2 },
+
+    aA: { value: 1, min: 0, max: 40, unit: "ms", decimals: 0 },
+    aD: { value: 614, min: 20, max: 900, unit: "ms", decimals: 0 },
+    aS: { value: 0, min: 0, max: 1, unit: "", decimals: 2 },
+    aR: { value: 5, min: 5, max: 700, unit: "ms", decimals: 0 },
+
+    duration: { value: 1000, min: 30, max: 1000, unit: "ms", decimals: 0 },
+    gain: { value: 0.55, min: 0, max: 0.9, unit: "", decimals: 2 }
+  };
+
+  let audioCtx = null;
+  let lastSim = null;
+  let animation = 0;
+
+  function clamp(v, min, max) {
+    return Math.max(min, Math.min(max, v));
+  }
+
+  function getPatch() {
+    const ms = (key) => params[key].value / 1000;
+    return {
+      waveform: $("waveform").value,
+      baseFreq: params.baseFreq.value,
+      clickLevel: params.clickLevel.value,
+      drive: params.drive.value,
+      pitchAmt: params.pitchAmt.value,
+      pA: ms("pA"),
+      pD: ms("pD"),
+      pS: params.pS.value,
+      pR: ms("pR"),
+      aA: ms("aA"),
+      aD: ms("aD"),
+      aS: params.aS.value,
+      aR: ms("aR"),
+      duration: ms("duration"),
+      gain: params.gain.value
+    };
+  }
+
+  function valueToAngle(key) {
+    const p = params[key];
+    const u = (p.value - p.min) / (p.max - p.min);
+    return -135 + u * 270;
+  }
+
+  function updateUI() {
+    for (const [key, p] of Object.entries(params)) {
+      const knob = document.querySelector(`[data-param="${key}"]`);
+      if (knob) knob.style.setProperty("--angle", `${valueToAngle(key)}deg`);
+
+      const read = $(`${key}Read`);
+      if (read) {
+        const v = p.value.toFixed(p.decimals);
+        read.textContent = p.unit ? `${v} ${p.unit}` : v;
+      }
+    }
+
+    const patch = getPatch();
+    const ampNow = adsrValue(Math.min(0.12, patch.duration), patch.aA, patch.aD, patch.aS, patch.aR, patch.duration);
+    $("cvMeter").style.height = `${Math.round(ampNow * 100)}%`;
+  }
+
+  function setupKnobs() {
+    document.querySelectorAll(".knob").forEach(knob => {
+      const key = knob.dataset.param;
+      let startY = 0;
+      let startValue = 0;
+      let dragging = false;
+
+      const begin = (clientY) => {
+        dragging = true;
+        startY = clientY;
+        startValue = params[key].value;
+        document.body.style.userSelect = "none";
+      };
+
+      const move = (clientY) => {
+        if (!dragging) return;
+        const p = params[key];
+        const range = p.max - p.min;
+        const delta = (startY - clientY) * range / 220;
+        const step = p.decimals === 0 ? 1 : 0.01;
+        p.value = clamp(Math.round((startValue + delta) / step) * step, p.min, p.max);
+        updateUI();
+        renderAll();
+      };
+
+      knob.addEventListener("mousedown", (e) => {
+        e.preventDefault();
+        begin(e.clientY);
+      });
+
+      window.addEventListener("mousemove", (e) => move(e.clientY));
+      window.addEventListener("mouseup", () => {
+        dragging = false;
+        document.body.style.userSelect = "";
+      });
+
+      knob.addEventListener("touchstart", (e) => {
+        e.preventDefault();
+        begin(e.touches[0].clientY);
+      }, { passive: false });
+
+      window.addEventListener("touchmove", (e) => {
+        if (dragging) move(e.touches[0].clientY);
+      }, { passive: false });
+
+      window.addEventListener("touchend", () => {
+        dragging = false;
+        document.body.style.userSelect = "";
+      });
+    });
+  }
+
+  function easeOutExp(u) {
+    u = clamp(u, 0, 1);
+    return 1 - Math.pow(2, -8 * u);
+  }
+
+  function adsrValue(t, A, D, S, R, gate) {
+    const eps = 1e-9;
+    A = Math.max(A, eps);
+    D = Math.max(D, eps);
+    R = Math.max(R, eps);
+
+    if (t < 0) return 0;
+    if (t < A) return t / A;
+    if (t < A + D) {
+      const u = (t - A) / D;
+      return 1 + (S - 1) * easeOutExp(u);
+    }
+    if (t < gate) return S;
+
+    const startVal = adsrValue(Math.min(gate, gate - 1e-6), A, D, S, R, 999);
+    const u = (t - gate) / R;
+    if (u >= 1) return 0;
+    return startVal * (1 - easeOutExp(u));
+  }
+
+  function oscSample(phase, type) {
+    const p = phase / (2 * Math.PI);
+    const frac = p - Math.floor(p);
+    switch (type) {
+      case "square": return frac < 0.5 ? 1 : -1;
+      case "sawtooth": return 2 * frac - 1;
+      case "triangle": return 1 - 4 * Math.abs(frac - 0.5);
+      default: return Math.sin(phase);
+    }
+  }
+
+  function saturate(x, drive) {
+    const amount = 1 + drive * 18;
+    return Math.tanh(x * amount) / Math.tanh(amount);
+  }
+
+  function simulateKick(patch, seconds = 1.25, sampleRate = 44100) {
+    const n = Math.floor(seconds * sampleRate);
+    const data = new Float32Array(n);
+    const ampEnv = new Float32Array(n);
+    const pitchEnv = new Float32Array(n);
+    const freqTrace = new Float32Array(n);
+    let phase = 0;
+
+    for (let i = 0; i < n; i++) {
+      const t = i / sampleRate;
+      const aEnv = adsrValue(t, patch.aA, patch.aD, patch.aS, patch.aR, patch.duration);
+      const pEnv = adsrValue(t, patch.pA, patch.pD, patch.pS, patch.pR, patch.duration);
+
+      const semis = patch.pitchAmt * pEnv;
+      const f = clamp(patch.baseFreq * Math.pow(2, semis / 12), 12, 1500);
+      phase += 2 * Math.PI * f / sampleRate;
+
+      let x = oscSample(phase, patch.waveform);
+
+      const clickTime = 0.006;
+      if (t < clickTime) {
+        const clickEnv = 1 - t / clickTime;
+        const click = (Math.random() * 2 - 1) * clickEnv * patch.clickLevel;
+        x = x * (1 - patch.clickLevel) + click;
+      }
+
+      x = saturate(x, patch.drive);
+      data[i] = x * aEnv * patch.gain;
+      ampEnv[i] = aEnv;
+      pitchEnv[i] = pEnv;
+      freqTrace[i] = f;
+    }
+
+    return { data, ampEnv, pitchEnv, freqTrace, sampleRate };
+  }
+
+  function metrics(sim, patch) {
+    let peak = 0;
+    let sumSq = 0;
+
+    for (const x of sim.data) {
+      const ax = Math.abs(x);
+      if (ax > peak) peak = ax;
+      sumSq += x * x;
+    }
+
+    const rms = Math.sqrt(sumSq / sim.data.length);
+    const threshold = Math.max(0.002, peak * 0.08);
+    let lastAudible = 0;
+
+    for (let i = 0; i < sim.data.length; i++) {
+      if (Math.abs(sim.data[i]) > threshold) lastAudible = i;
+    }
+
+    const first30 = sim.freqTrace.slice(0, Math.floor(0.03 * sim.sampleRate));
+    const drop = Math.max(...first30) - patch.baseFreq;
+
+    return {
+      peak,
+      rms,
+      bodyLength: lastAudible / sim.sampleRate,
+      drop
+    };
+  }
+
+  function drawScope(sim, patch) {
+    const canvas = $("scopeCanvas");
+    const ctx = canvas.getContext("2d");
+    const w = canvas.width;
+    const h = canvas.height;
+    ctx.clearRect(0, 0, w, h);
+
+    drawScopeGrid(ctx, w, h);
+
+    const traceEnd = Math.min(1.15, Math.max(patch.duration + patch.aR + 0.04, 0.2));
+    const maxIndex = Math.min(sim.data.length - 1, Math.floor(traceEnd * sim.sampleRate));
+    const mid = h / 2;
+
+    ctx.strokeStyle = "rgba(222,204,2,0.95)";
+    ctx.lineWidth = 3.0;
+    ctx.beginPath();
+
+    const samplesPerPixel = Math.max(1, Math.floor(maxIndex / w));
+    for (let x = 0; x < w; x++) {
+      const start = x * samplesPerPixel;
+      const end = Math.min(maxIndex, start + samplesPerPixel);
+      let min = 1;
+      let max = -1;
+
+      for (let i = start; i < end; i++) {
+        if (sim.data[i] < min) min = sim.data[i];
+        if (sim.data[i] > max) max = sim.data[i];
+      }
+
+      const y1 = mid - max * (h * 0.42);
+      const y2 = mid - min * (h * 0.42);
+      if (x === 0) ctx.moveTo(x, y1);
+      ctx.lineTo(x, y1);
+      ctx.lineTo(x, y2);
+    }
+
+    ctx.stroke();
+
+    ctx.strokeStyle = "rgba(255,255,255,0.25)";
+    ctx.beginPath();
+    ctx.moveTo(0, mid);
+    ctx.lineTo(w, mid);
+    ctx.stroke();
+
+    ctx.fillStyle = "rgba(255,255,255,0.65)";
+    ctx.font = "12px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace";
+    ctx.fillText(`${Math.round(traceEnd * 1000)} ms`, w - 70, h - 12);
+  }
+
+  function drawEnv(sim, patch) {
+    const canvas = $("envCanvas");
+    const ctx = canvas.getContext("2d");
+    const w = canvas.width;
+    const h = canvas.height;
+    ctx.clearRect(0, 0, w, h);
+
+    drawScopeGrid(ctx, w, h);
+
+    const total = Math.max(patch.duration + patch.aR, patch.duration + patch.pR, patch.aA + patch.aD, patch.pA + patch.pD, 0.25) + 0.04;
+
+    const plot = (arr, color) => {
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+
+      for (let x = 0; x < w; x++) {
+        const t = x / w * total;
+        const i = Math.min(arr.length - 1, Math.floor(t * sim.sampleRate));
+        const y = h - 14 - arr[i] * (h - 28);
+        if (x === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+
+      ctx.stroke();
+    };
+
+    plot(sim.ampEnv, "rgba(222,204,2,0.95)");
+    plot(sim.pitchEnv, "rgba(51,131,200,0.95)");
+
+    const gateX = patch.duration / total * w;
+    ctx.strokeStyle = "rgba(255,255,255,0.45)";
+    ctx.setLineDash([4, 4]);
+    ctx.beginPath();
+    ctx.moveTo(gateX, 0);
+    ctx.lineTo(gateX, h);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+  }
+
+  function drawScopeGrid(ctx, w, h) {
+    ctx.fillStyle = "#050608";
+    ctx.fillRect(0, 0, w, h);
+
+    ctx.strokeStyle = "rgba(222,204,2,0.10)";
+    ctx.lineWidth = 1;
+
+    for (let x = 0; x <= w; x += 28) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, h);
+      ctx.stroke();
+    }
+
+    for (let y = 0; y <= h; y += 28) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(w, y);
+      ctx.stroke();
+    }
+  }
+
+  function drawPatchCables() {
+    const rack = $("rack");
+    const canvas = $("patchCanvas");
+    const dpr = window.devicePixelRatio || 1;
+    const rect = rack.getBoundingClientRect();
+
+    canvas.width = Math.floor(rect.width * dpr);
+    canvas.height = Math.floor(rect.height * dpr);
+    canvas.style.width = `${rect.width}px`;
+    canvas.style.height = `${rect.height}px`;
+
+    const ctx = canvas.getContext("2d");
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, rect.width, rect.height);
+
+    const center = (id) => {
+      const el = $(id);
+      const r = el.getBoundingClientRect();
+      return {
+        x: r.left - rect.left + r.width / 2,
+        y: r.top - rect.top + r.height / 2
+      };
+    };
+
+    function drawCablePath(ctx, a, b, sag, sidePull) {
+      const dx = b.x - a.x;
+      const dy = b.y - a.y;
+      const dist = Math.hypot(dx, dy);
+      const nx = dist ? -dy / dist : 0;
+      const ny = dist ? dx / dist : 0;
+
+      /*
+        The cable is drawn as two cubic Bezier segments meeting at a low midpoint.
+        This makes the patch cord hang like a loose rope instead of taking the
+        shortest smooth path between jacks.
+      */
+      const mid = {
+        x: (a.x + b.x) / 2 + nx * sidePull,
+        y: Math.max(a.y, b.y) + sag
+      };
+
+      const c1 = {
+        x: a.x + dx * 0.12 + nx * sidePull * 0.18,
+        y: a.y + sag * 0.18
+      };
+
+      const c2 = {
+        x: mid.x - dx * 0.10,
+        y: mid.y
+      };
+
+      const c3 = {
+        x: mid.x + dx * 0.10,
+        y: mid.y
+      };
+
+      const c4 = {
+        x: b.x - dx * 0.12 + nx * sidePull * 0.18,
+        y: b.y + sag * 0.18
+      };
+
+      ctx.beginPath();
+      ctx.moveTo(a.x, a.y);
+      ctx.bezierCurveTo(c1.x, c1.y, c2.x, c2.y, mid.x, mid.y);
+      ctx.bezierCurveTo(c3.x, c3.y, c4.x, c4.y, b.x, b.y);
+    }
+
+    const cable = (from, to, color, sag = 120, sidePull = 0) => {
+      const a = center(from);
+      const b = center(to);
+
+      // Soft contact shadow, making the cable read as being above the panels.
+      ctx.save();
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      ctx.shadowColor = "rgba(0,0,0,0.65)";
+      ctx.shadowBlur = 14;
+      ctx.shadowOffsetY = 7;
+      ctx.strokeStyle = "rgba(0,0,0,0.45)";
+      ctx.lineWidth = 13;
+      drawCablePath(ctx, a, b, sag, sidePull);
+      ctx.stroke();
+      ctx.restore();
+
+      // Dark rubber undercoat.
+      ctx.save();
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      ctx.strokeStyle = "rgba(14,15,18,0.96)";
+      ctx.lineWidth = 10;
+      drawCablePath(ctx, a, b, sag, sidePull);
+      ctx.stroke();
+      ctx.restore();
+
+      // Main cable color.
+      ctx.save();
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 7;
+      drawCablePath(ctx, a, b, sag, sidePull);
+      ctx.stroke();
+
+      // Top highlight, slightly thinner and offset upward.
+      ctx.globalAlpha = 0.36;
+      ctx.strokeStyle = "rgba(255,255,255,0.85)";
+      ctx.lineWidth = 1.8;
+      ctx.translate(0, -2);
+      drawCablePath(ctx, a, b, sag, sidePull);
+      ctx.stroke();
+      ctx.restore();
+
+      // Metal plug collars drawn on top of the cable at both jack ends.
+      for (const p of [a, b]) {
+        ctx.save();
+        ctx.fillStyle = "rgba(210,214,222,0.92)";
+        ctx.strokeStyle = "rgba(0,0,0,0.65)";
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 8.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = "rgba(16,17,22,0.95)";
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 4.2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+    };
+
+    const shortCable = (from, to, color, lift = 42) => {
+      const a = center(from);
+      const b = center(to);
+      const dx = b.x - a.x;
+      const midX = (a.x + b.x) / 2;
+      const topY = Math.min(a.y, b.y) - lift;
+
+      const path = () => {
+        ctx.beginPath();
+        ctx.moveTo(a.x, a.y);
+        ctx.bezierCurveTo(a.x + dx * 0.20, topY, midX - dx * 0.12, topY, midX, topY);
+        ctx.bezierCurveTo(midX + dx * 0.12, topY, b.x - dx * 0.20, topY, b.x, b.y);
+      };
+
+      const stroke = (width, strokeStyle, shadow = false) => {
+        ctx.save();
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+        if (shadow) {
+          ctx.shadowColor = "rgba(0,0,0,0.65)";
+          ctx.shadowBlur = 12;
+          ctx.shadowOffsetY = 5;
+        }
+        ctx.strokeStyle = strokeStyle;
+        ctx.lineWidth = width;
+        path();
+        ctx.stroke();
+        ctx.restore();
+      };
+
+      stroke(12, "rgba(0,0,0,0.42)", true);
+      stroke(9, "rgba(14,15,18,0.96)");
+      stroke(6, color);
+
+      ctx.save();
+      ctx.globalAlpha = 0.36;
+      ctx.strokeStyle = "rgba(255,255,255,0.85)";
+      ctx.lineWidth = 1.6;
+      ctx.translate(0, -2);
+      path();
+      ctx.stroke();
+      ctx.restore();
+
+      for (const p of [a, b]) {
+        ctx.save();
+        ctx.fillStyle = "rgba(210,214,222,0.92)";
+        ctx.strokeStyle = "rgba(0,0,0,0.65)";
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 7.4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = "rgba(16,17,22,0.95)";
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 3.8, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+    };
+
+    cable("jack-gate-out-a", "jack-gate-pitch", "rgba(197,66,66,0.98)", 118, -22);
+    cable("jack-gate-out-b", "jack-gate-amp", "rgba(197,66,66,0.98)", 168, 28);
+    cable("jack-pitch-out", "jack-vco-cv", "rgba(51,131,200,0.98)", 112, -16);
+    cable("jack-vco-out", "jack-drive-in", "rgba(222,204,2,0.98)", 138, 22);
+    cable("jack-drive-out", "jack-vca-in", "rgba(222,204,2,0.98)", 158, -10);
+    cable("jack-ampenv-out", "jack-vca-cv", "rgba(63,157,98,0.98)", 124, 24);
+    cable("jack-vca-out", "jack-out-in", "rgba(222,204,2,0.98)", 146, 18);
+    shortCable("jack-main-out", "jack-scope-in", "rgba(222,204,2,0.98)", 36);
+  }
+
+  function renderAll() {
+    const patch = getPatch();
+    const sim = simulateKick(patch, 1.25, 44100);
+    lastSim = sim;
+
+    const m = metrics(sim, patch);
+    drawScope(sim, patch);
+    drawEnv(sim, patch);
+
+    $("peakMetric").textContent = m.peak.toFixed(3);
+    $("rmsMetric").textContent = m.rms.toFixed(3);
+    $("bodyMetric").textContent = `${Math.round(m.bodyLength * 1000)} ms`;
+    $("dropMetric").textContent = `${Math.round(m.drop)} Hz`;
+
+    if (!animation) {
+      animation = requestAnimationFrame(() => {
+        animation = 0;
+        drawPatchCables();
+      });
+    }
+  }
+
+  async function playKick() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state !== "running") await audioCtx.resume();
+
+    const patch = getPatch();
+    const now = audioCtx.currentTime + 0.01;
+    const gate = patch.duration;
+    const stopAt = now + Math.max(gate + patch.aR + 0.08, patch.pA + patch.pD + patch.pR + 0.08);
+
+    const osc = audioCtx.createOscillator();
+    osc.type = patch.waveform;
+
+    const vca = audioCtx.createGain();
+    const master = audioCtx.createGain();
+    const shaper = audioCtx.createWaveShaper();
+
+    shaper.curve = makeDistortionCurve(patch.drive);
+    shaper.oversample = "2x";
+
+    const click = audioCtx.createBufferSource();
+    const clickGain = audioCtx.createGain();
+    const clickBuffer = audioCtx.createBuffer(1, Math.floor(audioCtx.sampleRate * 0.006), audioCtx.sampleRate);
+    const ch = clickBuffer.getChannelData(0);
+
+    for (let i = 0; i < ch.length; i++) {
+      ch[i] = (Math.random() * 2 - 1) * (1 - i / ch.length);
+    }
+
+    click.buffer = clickBuffer;
+
+    master.gain.value = patch.gain;
+
+    vca.gain.setValueAtTime(0.0001, now);
+    scheduleADSR(vca.gain, now, patch.aA, patch.aD, patch.aS, patch.aR, gate, 1);
+
+    osc.frequency.setValueAtTime(patch.baseFreq, now);
+    schedulePitchADSR(osc.frequency, now, patch);
+
+    clickGain.gain.setValueAtTime(patch.clickLevel, now);
+    clickGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.008);
+
+    osc.connect(shaper);
+    shaper.connect(vca);
+    click.connect(clickGain);
+    clickGain.connect(vca);
+    vca.connect(master);
+    master.connect(audioCtx.destination);
+
+    osc.start(now);
+    click.start(now);
+    osc.stop(stopAt);
+    click.stop(now + 0.012);
+  }
+
+  function scheduleADSR(param, now, A, D, S, R, gate, peak) {
+    const eps = 0.0001;
+    A = Math.max(A, 0.001);
+    D = Math.max(D, 0.001);
+    R = Math.max(R, 0.001);
+
+    param.cancelScheduledValues(now);
+    param.setValueAtTime(eps, now);
+    param.exponentialRampToValueAtTime(Math.max(eps, peak), now + A);
+    param.exponentialRampToValueAtTime(Math.max(eps, S * peak), now + A + D);
+    param.setValueAtTime(Math.max(eps, S * peak), now + gate);
+    param.exponentialRampToValueAtTime(eps, now + gate + R);
+  }
+
+  function schedulePitchADSR(freqParam, now, patch) {
+    const eps = 0.001;
+    const A = Math.max(patch.pA, eps);
+    const D = Math.max(patch.pD, eps);
+    const R = Math.max(patch.pR, eps);
+    const high = patch.baseFreq * Math.pow(2, patch.pitchAmt / 12);
+    const sustain = patch.baseFreq * Math.pow(2, (patch.pitchAmt * patch.pS) / 12);
+
+    freqParam.cancelScheduledValues(now);
+    freqParam.setValueAtTime(Math.max(8, patch.baseFreq), now);
+
+    if (patch.pA <= 0.001) {
+      freqParam.setValueAtTime(high, now);
+    } else {
+      freqParam.exponentialRampToValueAtTime(high, now + A);
+    }
+
+    freqParam.exponentialRampToValueAtTime(Math.max(8, sustain), now + A + D);
+    freqParam.setValueAtTime(Math.max(8, sustain), now + patch.duration);
+    freqParam.exponentialRampToValueAtTime(Math.max(8, patch.baseFreq), now + patch.duration + R);
+  }
+
+  function makeDistortionCurve(drive) {
+    const n = 2048;
+    const curve = new Float32Array(n);
+    const amount = 1 + drive * 40;
+
+    for (let i = 0; i < n; i++) {
+      const x = i * 2 / n - 1;
+      curve[i] = Math.tanh(x * amount) / Math.tanh(amount);
+    }
+
+    return curve;
+  }
+
+  function randomizePatch() {
+    const pick = (min, max, integer = true) => {
+      const v = min + Math.random() * (max - min);
+      return integer ? Math.round(v) : Number(v.toFixed(2));
+    };
+
+    params.pitchAmt.value = pick(24, 76);
+    params.pA.value = pick(0, 6);
+    params.pD.value = pick(35, 180);
+    params.pS.value = Math.random() < 0.85 ? 0 : Number((Math.random() * 0.15).toFixed(2));
+    params.pR.value = pick(15, 120);
+
+    params.aA.value = pick(0, 5);
+    params.aD.value = pick(120, 560);
+    params.aS.value = Math.random() < 0.8 ? 0 : Number((Math.random() * 0.18).toFixed(2));
+    params.aR.value = pick(40, 280);
+    params.duration.value = pick(250, 1000);
+
+    params.baseFreq.value = pick(36, 62);
+    params.clickLevel.value = Number((Math.random() * 0.22).toFixed(2));
+    params.drive.value = Number((Math.random() * 0.55).toFixed(2));
+
+    updateUI();
+    renderAll();
+  }
+
+  $("playBtn").addEventListener("click", playKick);
+  $("modulePlayBtn").addEventListener("click", playKick);
+  $("gateTrigBtn").addEventListener("click", playKick);
+  $("randomBtn").addEventListener("click", randomizePatch);
+  $("waveform").addEventListener("input", renderAll);
+
+  window.addEventListener("keydown", (e) => {
+    if (e.code === "Space" && !["INPUT", "SELECT", "BUTTON"].includes(document.activeElement.tagName)) {
+      e.preventDefault();
+      playKick();
+    }
+  });
+
+  window.addEventListener("resize", () => {
+    drawPatchCables();
+  });
+
+  setupKnobs();
+  updateUI();
+  renderAll();
+})();
+</script>
+</body>
+</html>
