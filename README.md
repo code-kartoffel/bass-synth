@@ -1,3 +1,4 @@
+
 # Modular Sequenced Bass Synth
 
 A browser-based rack-style sequenced bass synthesizer for techno-oriented basslines.
